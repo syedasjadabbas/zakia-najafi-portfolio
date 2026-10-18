@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { site } from "@/content/site";
 import { videos, type Video } from "@/content/videos";
 import { ArrowRightIcon } from "./icons";
+import { RecordingGrid } from "./recording-grid";
 import { YouTubePlayer } from "./youtube-player";
 
 function meta(video: Video) {
@@ -57,40 +57,7 @@ export function Recordings() {
           </figcaption>
         </figure>
 
-        <ul className="mt-12 grid gap-y-6 sm:grid-cols-3 sm:gap-x-6">
-          {more.map((video) => (
-            <li key={video.id}>
-              <a
-                href={`https://www.youtube.com/watch?v=${video.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={video.title}
-                className="group grid grid-cols-[9rem_1fr] items-start gap-4 sm:block"
-              >
-                <span className="relative block aspect-video overflow-hidden rounded-[5px] bg-sand">
-                  <Image
-                    src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
-                    alt=""
-                    fill
-                    sizes="(min-width: 640px) 24rem, 9rem"
-                    unoptimized
-                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                  />
-                </span>
-                <span className="block sm:mt-4">
-                  <span className="block font-serif text-[1.3125rem] leading-snug transition-colors group-hover:text-forest">
-                    {video.label}
-                  </span>
-                  {meta(video) ? <span className="mt-1 block text-[0.9375rem] text-soft">{meta(video)}</span> : null}
-                  <span className="mt-0.5 block text-[0.875rem] tabular-nums text-soft">
-                    {video.date} · {video.duration}
-                  </span>
-                  <span className="sr-only"> (opens YouTube in a new tab)</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <RecordingGrid videos={more} />
 
         <a
           href={site.youtubeChannel}

@@ -85,8 +85,7 @@ export function Introduction() {
               <span className="block italic text-forest">Najafi</span>
             </h1>
 
-            <p className="mt-8 flex items-center gap-5 font-serif text-[1.375rem] leading-snug text-ink md:text-[1.5rem]">
-              <span aria-hidden className="h-px w-14 shrink-0 bg-brass" />
+            <p className="mt-8 font-serif text-[1.375rem] leading-snug text-ink md:text-[1.5rem]">
               {site.qualification}
             </p>
 
