@@ -1,0 +1,114 @@
+import "server-only";
+
+/**
+ * Minimal database access.
+ *
+ * Production: PostgreSQL via DATABASE_URL (node-postgres).
+ * Development without DATABASE_URL: an embedded PostgreSQL (PGlite) stored in
+ * ./.data/pglite, so the same SQL runs everywhere.
+ */
+
+export type Row = Record<string, unknown>;
+export type Query = <T extends Row = Row>(sql: string, params?: unknown[]) => Promise<T[]>;
+
+type Db = {
+  query: Query;
+  transaction: <T>(fn: (query: Query) => Promise<T>) => Promise<T>;
+};
+
+const SCHEMA = `
+create table if not exists registrations (
+  id text primary key,
+  lecture_slug text not null,
+  name text not null,
+  email text not null,
+  status text not null check (status in
+    ('pending_payment', 'pending_verification', 'confirmed', 'rejected', 'cancelled')),
+  payment_method text not null check (payment_method in ('free', 'manual', 'stripe')),
+  amount_minor integer,
+  currency text,
+  payment_reference text,
+  stripe_session_id text unique,
+  access_token_hash text not null unique,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists registrations_one_active_per_email
+  on registrations (lecture_slug, lower(email))
+  where status not in ('rejected', 'cancelled');
+
+create unique index if not exists registrations_unique_payment_reference
+  on registrations (lower(payment_reference))
+  where payment_reference is not null and status <> 'rejected';
+
+create table if not exists lecture_access (
+  lecture_slug text primary key,
+  instructions text not null,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists processed_payment_events (
+  event_id text primary key,
+  processed_at timestamptz not null default now()
+);
+`;
+
+declare global {
+  var __zbnDb: Promise<Db> | undefined;
+}
+
+async function createPostgres(url: string): Promise<Db> {
+  const { Pool } = await import("pg");
+  const pool = new Pool({ connectionString: url, max: 5 });
+  const query: Query = async (sql, params) => (await pool.query(sql, params)).rows;
+  await pool.query(SCHEMA);
+  return {
+    query,
+    async transaction(fn) {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        const result = await fn(async (sql, params) => (await client.query(sql, params)).rows);
+        await client.query("commit");
+        return result;
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  };
+}
+
+async function createEmbedded(): Promise<Db> {
+  const { PGlite } = await import("@electric-sql/pglite");
+  const dataDir = process.env.PGLITE_DATA_DIR ?? "./.data/pglite";
+  if (dataDir !== "memory://") {
+    const { mkdirSync } = await import("node:fs");
+    mkdirSync(dataDir, { recursive: true });
+  }
+  const pg = dataDir === "memory://" ? new PGlite() : new PGlite(dataDir);
+  await pg.exec(SCHEMA);
+  return {
+    query: async (sql, params) => (await pg.query(sql, params)).rows as never,
+    transaction: (fn) =>
+      pg.transaction((tx) => fn(async (sql, params) => (await tx.query(sql, params)).rows as never)),
+  };
+}
+
+export function getDb(): Promise<Db> {
+  globalThis.__zbnDb ??= (
+    process.env.DATABASE_URL ? createPostgres(process.env.DATABASE_URL) : createEmbedded()
+  ).catch((error) => {
+    globalThis.__zbnDb = undefined; // allow a retry on the next request
+    throw error;
+  });
+  return globalThis.__zbnDb;
+}
+
+/** True when a Postgres unique constraint was violated. */
+export function isUniqueViolation(error: unknown): boolean {
+  return typeof error === "object" && error !== null && (error as { code?: string }).code === "23505";
+}

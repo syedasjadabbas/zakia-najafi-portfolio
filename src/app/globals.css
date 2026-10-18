@@ -1,26 +1,234 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Identity: warm ivory paper, deep forest green, charcoal ink, and a muted
+ * brass used sparingly for dates and small accents.
+ *
+ * Contrast on ivory: ink 15.4:1, soft 8.7:1, forest 10.8:1, brass-dark 5.5:1 (4.8:1 on sand).
+ * On forest: ivory 10.8:1, brass-light 6.6:1, ivory at 65% 5.6:1.
+ * Mid brass (3.2:1) is only used for decorative arrows and rules.
+ */
+@theme {
+  --color-ivory: #f8f4ec;
+  --color-sand: #efe6d4;
+  --color-sand-deep: #e3d6bd;
+  --color-ink: #1e1d1a;
+  --color-soft: #4a453d;
+  --color-line: #ddd3c0;
+  --color-forest: #1f3d2e;
+  --color-forest-deep: #162c21;
+  --color-forest-tint: #e3e9df;
+  --color-brass: #a8843f;
+  --color-brass-dark: #7a5f2a;
+  --color-brass-light: #d9bd85;
+  --color-alert: #8f2d1c;
+
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-amiri), "Traditional Arabic", serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 1.125rem;
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--color-forest-tint);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  [id] {
+    scroll-margin-top: 5.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-page {
+      padding-inline: 3rem;
+    }
+  }
+
+  /* Small uppercase label, used once per section at most. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brass-dark);
+  }
+
+  .lead {
+    font-family: var(--font-serif);
+    font-size: 1.3125rem;
+    line-height: 1.55;
+    font-optical-sizing: auto;
+  }
+  @media (min-width: 768px) {
+    .lead {
+      font-size: 1.5rem;
+    }
+  }
+
+  .link {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    transition: text-decoration-color 160ms ease, color 160ms ease;
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-forest);
+    background: var(--color-forest);
+    color: var(--color-ivory);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    border-radius: 3px;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+  .button:hover {
+    background: var(--color-forest-deep);
+    border-color: var(--color-forest-deep);
+  }
+  .button:disabled,
+  .button[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .button[data-pending="true"] {
+    opacity: 0.85;
+    cursor: progress;
+  }
+
+  .button-outline {
+    background: transparent;
+    color: var(--color-forest);
+  }
+  .button-outline:hover {
+    background: var(--color-forest);
+    color: var(--color-ivory);
+  }
+
+  /* On dark forest surfaces. */
+  .button-light {
+    background: var(--color-ivory);
+    border-color: var(--color-ivory);
+    color: var(--color-forest);
+  }
+  .button-light:hover {
+    background: var(--color-brass-light);
+    border-color: var(--color-brass-light);
+    color: var(--color-forest-deep);
+  }
+  .button-ghost-light {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--color-ivory) 45%, transparent);
+    color: var(--color-ivory);
+  }
+  .button-ghost-light:hover {
+    background: color-mix(in srgb, var(--color-ivory) 10%, transparent);
+    border-color: var(--color-ivory);
+  }
+
+  .arrow {
+    transition: transform 180ms ease;
+  }
+  :is(a, button):hover > .arrow {
+    transform: translateX(3px);
+  }
+
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.65rem 0.875rem;
+    background: #fffdf8;
+    border: 1px solid #b8ac96;
+    border-radius: 3px;
+    font: inherit;
+    color: inherit;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .field:hover {
+    border-color: var(--color-soft);
+  }
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--color-forest);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-forest) 18%, transparent);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-alert);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
