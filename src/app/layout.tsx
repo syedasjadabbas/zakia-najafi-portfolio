@@ -1,28 +1,33 @@
 import type { Metadata, Viewport } from "next";
-import { Amiri, IBM_Plex_Sans, Newsreader } from "next/font/google";
+import localFont from "next/font/local";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const newsreader = Newsreader({
+// Fonts are self-hosted (OFL-1.1, via Fontsource 5.3.0) so builds and visitors
+// never depend on Google Fonts.
+const newsreader = localFont({
   variable: "--font-newsreader",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
   display: "swap",
+  src: [
+    { path: "./_fonts/newsreader-wght-normal.woff2", weight: "200 800", style: "normal" },
+    { path: "./_fonts/newsreader-wght-italic.woff2", weight: "200 800", style: "italic" },
+  ],
 });
 
-const plex = IBM_Plex_Sans({
+const plex = localFont({
   variable: "--font-plex",
-  subsets: ["latin"],
-  weight: ["400", "500"],
   display: "swap",
+  src: [
+    { path: "./_fonts/plex-sans-400.woff2", weight: "400", style: "normal" },
+    { path: "./_fonts/plex-sans-500.woff2", weight: "500", style: "normal" },
+  ],
 });
 
-const amiri = Amiri({
+const amiri = localFont({
   variable: "--font-amiri",
-  subsets: ["arabic"],
-  weight: "400",
   display: "swap",
   preload: false,
+  src: [{ path: "./_fonts/amiri-arabic-400.woff2", weight: "400", style: "normal" }],
 });
 
 export const metadata: Metadata = {
@@ -45,7 +50,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f8f4ec",
+  themeColor: "#1e1d1a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

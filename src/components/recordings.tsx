@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { site } from "@/content/site";
 import { videos, type Video } from "@/content/videos";
+import { ArrowRightIcon, PlayIcon } from "./icons";
 import { YouTubePlayer } from "./youtube-player";
 
 function meta(video: Video) {
@@ -12,7 +13,7 @@ export function Recordings() {
   if (!featured) return null;
 
   return (
-    <section id="recordings" aria-labelledby="recordings-title" className="py-20 md:py-28">
+    <section id="recordings" aria-labelledby="recordings-title" className="py-20 md:py-24">
       <div className="container-page">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -25,79 +26,85 @@ export function Recordings() {
             href={site.youtubeChannel}
             target="_blank"
             rel="noopener noreferrer"
-            className="link hidden text-forest sm:inline"
+            className="group hidden items-center gap-2 text-[0.9688rem] font-medium text-forest sm:inline-flex"
           >
-            All recordings on YouTube
+            <span className="link">All recordings on YouTube</span>
+            <ArrowRightIcon className="arrow" />
           </a>
         </div>
 
-        <figure className="mt-12 grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12">
-          <div className="lg:col-span-8">
-            <YouTubePlayer id={featured.id} title={featured.title} image={featured.image} />
+        <figure className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12">
+          <div className="lg:col-span-7">
+            <YouTubePlayer id={featured.id} title={featured.title} image={featured.image} duration={featured.duration} />
           </div>
-          <figcaption className="lg:col-span-4 lg:pb-2">
-            <p className="eyebrow">Featured · {featured.duration}</p>
-            <h3 className="mt-3 text-[2rem] leading-tight md:text-[2.5rem]">{featured.label}</h3>
+          <figcaption className="lg:col-span-5">
+            <span className="badge badge-brass">Featured</span>
+            <h3 className="mt-4 text-[2.125rem] leading-tight md:text-[2.625rem]">{featured.label}</h3>
             <p className="mt-3 text-soft">
               {meta(featured)}
               {meta(featured) ? <br /> : null}
-              {featured.date}
+              {featured.date} · {featured.duration}
             </p>
             <a
               href={`https://www.youtube.com/watch?v=${featured.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="link mt-6 inline-block text-forest"
+              className="group mt-6 inline-flex items-center gap-2 text-[0.9688rem] font-medium text-forest"
             >
-              Open on YouTube
+              <span className="link">Watch on YouTube</span>
+              <ArrowRightIcon className="arrow" />
             </a>
           </figcaption>
         </figure>
 
-        <div className="mt-16">
-          <h3 className="eyebrow">More majalis</h3>
-          <ul className="mt-5 grid gap-x-8 border-t border-line md:grid-cols-3">
-            {more.map((video) => (
-              <li key={video.id} className="border-b border-line md:border-b-0">
-                <a
-                  href={`https://www.youtube.com/watch?v=${video.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={video.title}
-                  className="group grid grid-cols-[8.5rem_1fr] items-start gap-4 py-5 md:block md:py-6"
-                >
-                  <span className="relative block aspect-video overflow-hidden bg-sand">
-                    <Image
-                      src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
-                      alt=""
-                      fill
-                      sizes="(min-width: 768px) 22rem, 8.5rem"
-                      unoptimized
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    />
-                  </span>
-                  <span className="block md:mt-4">
-                    <span className="block font-serif text-[1.3125rem] leading-snug transition-colors group-hover:text-forest">
-                      {video.label}
+        <ul className="mt-12 grid gap-y-6 sm:grid-cols-3 sm:gap-x-6">
+          {more.map((video) => (
+            <li key={video.id}>
+              <a
+                href={`https://www.youtube.com/watch?v=${video.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={video.title}
+                className="group grid grid-cols-[9rem_1fr] items-start gap-4 sm:block"
+              >
+                <span className="relative block aspect-video overflow-hidden rounded-[5px] bg-sand">
+                  <Image
+                    src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
+                    alt=""
+                    fill
+                    sizes="(min-width: 640px) 24rem, 9rem"
+                    unoptimized
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-forest-deep/85 py-1 pl-1 pr-2.5 text-[0.75rem] tabular-nums text-ivory">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ivory text-forest">
+                      <PlayIcon size={8} className="ml-px" />
                     </span>
-                    {meta(video) ? <span className="mt-1 block text-[0.9375rem] text-soft">{meta(video)}</span> : null}
-                    <span className="mt-1 block text-[0.875rem] tabular-nums text-soft">
-                      {video.date} · {video.duration}
-                    </span>
+                    {video.duration}
                   </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a
-            href={site.youtubeChannel}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="button button-outline mt-8 sm:hidden"
-          >
-            All recordings on YouTube
-          </a>
-        </div>
+                </span>
+                <span className="block sm:mt-4">
+                  <span className="block font-serif text-[1.3125rem] leading-snug transition-colors group-hover:text-forest">
+                    {video.label}
+                  </span>
+                  {meta(video) ? <span className="mt-1 block text-[0.9375rem] text-soft">{meta(video)}</span> : null}
+                  <span className="mt-0.5 block text-[0.875rem] text-soft">{video.date}</span>
+                  <span className="sr-only"> (opens YouTube in a new tab)</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <a
+          href={site.youtubeChannel}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="button button-outline mt-10 sm:hidden"
+        >
+          All recordings on YouTube
+          <ArrowRightIcon className="arrow" />
+        </a>
       </div>
     </section>
   );

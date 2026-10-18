@@ -2,66 +2,103 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { useActiveSection, type NavItem } from "./nav-links";
 
-export function MobileMenu({ items }: { items: { label: string; href: string }[] }) {
+export function MobileMenu({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const active = useActiveSection(items);
+  const primary = items.find((item) => item.primary);
+  // In the panel, the primary destination comes first.
+  const ordered = [...items.filter((item) => item.primary), ...items.filter((item) => !item.primary)];
+
+  const close = (restoreFocus: boolean) => {
+    setOpen(false);
+    if (restoreFocus) buttonRef.current?.focus();
+  };
 
   useEffect(() => {
     if (!open) return;
+    panelRef.current?.querySelector<HTMLElement>("a")?.focus();
+
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
+      if (event.key === "Escape") close(true);
     };
+    const onPointer = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!panelRef.current?.contains(target) && !buttonRef.current?.contains(target)) close(false);
+    };
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onResize = () => desktop.matches && close(false);
+
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    desktop.addEventListener("change", onResize);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+      desktop.removeEventListener("change", onResize);
+    };
   }, [open]);
 
   return (
-    <>
+    <div className="flex items-center gap-5 lg:hidden">
+      {primary ? (
+        <Link
+          href={primary.href}
+          className="hidden whitespace-nowrap text-[0.9375rem] font-medium text-brass-light min-[420px]:inline"
+        >
+          {primary.label}
+        </Link>
+      ) : null}
+
       <button
         ref={buttonRef}
         type="button"
         aria-expanded={open}
         aria-controls={id}
-        aria-label={open ? "Close menu" : "Open menu"}
         onClick={() => setOpen((value) => !value)}
-        className="-mr-2 inline-flex h-10 w-10 items-center justify-center text-forest"
+        className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-end px-2 text-[0.9375rem] text-white/85 transition-colors hover:text-white"
       >
-        <svg aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">
-          {open ? (
-            <path d="M5 5l12 12M17 5L5 17" />
-          ) : (
-            <path d="M3 7h16M3 15h16" />
-          )}
-        </svg>
+        {open ? "Close" : "Menu"}
       </button>
-      <nav
+
+      <div
+        ref={panelRef}
         id={id}
-        aria-label="Main"
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-line bg-ivory shadow-[0_12px_24px_-16px_rgba(30,29,26,0.25)]"
+        className="absolute inset-x-0 top-full border-b border-white/10 bg-ink"
       >
-        <ul className="container-page py-4">
-          {items.map((item) => (
-            <li key={item.href} className="border-b border-line last:border-0">
-              <Link
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between py-3.5 font-serif text-[1.375rem] text-ink"
-              >
-                {item.label}
-                <span aria-hidden className="text-[1rem] text-brass">
-                  →
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </>
+        <nav aria-label="Main" className="container-page pb-8 pt-3">
+          <ul>
+            {ordered.map((item) => {
+              const isActive = active === item.href.split("#")[1];
+              return (
+                <li key={item.href} className="border-b border-white/10 last:border-b-0">
+                  <Link
+                    href={item.href}
+                    onClick={() => close(false)}
+                    aria-current={isActive ? "location" : undefined}
+                    className={[
+                      "flex items-baseline justify-between py-4 font-serif text-[1.5rem] leading-tight",
+                      item.primary ? "text-brass-light" : "text-white",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                    {item.primary ? (
+                      <span className="font-sans text-[0.875rem] text-white/60">Upcoming sessions</span>
+                    ) : isActive ? (
+                      <span className="font-sans text-[0.875rem] text-white/60">You are here</span>
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    </div>
   );
 }

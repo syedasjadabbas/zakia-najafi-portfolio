@@ -65,11 +65,12 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 | --- | --- | --- |
 | Contact email | `site.email` | No email link anywhere; contact shows social profiles only |
 | Biography | `site.biography` | About shows a short factual summary |
-| Approved high-resolution portrait | `public/images/` + `site.portrait` | Hero uses a 424×530 crop of the photo on her official YouTube thumbnail for the 1st Majlis, Muharram 1448 (poster designed for Al-Abbas Islamic Centre). Confirm permission or replace. |
+| Permission for the hero photo | `public/images/portrait-muharram-1448.jpg` | The portrait from her Muharram 1448 YouTube thumbnails (poster for Al-Abbas Islamic Centre, 17 June 2026), 424×530. Confirm use, and ideally supply the original photograph at full resolution. |
 | Payment method and instructions, or Stripe account | `site.payment.manualInstructions` or Stripe env vars | Paid lectures show "registration will open shortly" |
 | Lectures (title, date/time, time zone, language, platform, fee, capacity, deadline) | `src/content/lectures.ts` | "New lecture details will be announced here." |
 | Hawzah course / Tafseer class details | `site.courses` | One line saying schedules will be published |
 | Consultation scope and how to request | `site.consultation.details` | One factual sentence |
+| Hero tagline (optional, e.g. the motto in the approved mock-up) | `site.heroTagline` | Not shown; no wording has been approved |
 | Domain | `NEXT_PUBLIC_SITE_URL` | Canonical URLs and sitemap point at localhost |
 | Approved logo or monogram | `src/app/icon.tsx` | Placeholder "Z" monogram favicon |
 | Privacy notice review | `src/app/privacy/page.tsx` | Plain description of what the site actually collects; not legal advice |
@@ -80,4 +81,6 @@ No publications, testimonials or statistics are shown, and none were invented. A
 
 - A lecture URL that doesn't exist streams a "Page not found" page with `noindex`, but returns HTTP 200: with partial prerendering the static shell is sent before the lookup runs.
 - Revoking a confirmed Stripe registration in the admin does not issue a refund. Refund in the Stripe dashboard.
-- Terms page not implemented. Add one if paid lectures need cancellation or refund terms.
+- The Terms page (`/terms`) covers only how registration works. Fees, cancellation and refund terms must be supplied and reviewed before paid lectures go live.
+- Fonts (Newsreader, IBM Plex Sans, Amiri; OFL-1.1) are self-hosted from `src/app/_fonts/` via `next/font/local`. The Google Fonts loader fails to build in a folder whose path contains `&`, and self-hosting also keeps visitors off Google.
+- Brand icons in the contact section and footer come from Simple Icons v16.35.0 (CC0), stored in `src/components/brand-paths.ts`.

@@ -37,22 +37,29 @@ export const site = {
     "Teacher of Islamic sciences, delivering lectures and majalis, Hawzah courses and Tafseer classes. Upcoming online lectures are announced here and open for registration.",
 
   /**
+   * Optional short line shown beside the portrait (one phrase per line), e.g. a
+   * motto the client approves. Left empty: no wording has been supplied.
+   */
+  heroTagline: [] as string[],
+
+  /**
    * Biography paragraphs. None has been supplied yet; the About section falls
    * back to a short factual summary while this is empty.
    */
   biography: [] as string[],
 
   /**
-   * Hero image. Currently a crop of the photograph used on her official YouTube
-   * channel for the 1st Majlis of Muharram 1448 (17 June 2026). Replace with a
-   * client-approved, higher-resolution portrait when one is supplied.
+   * Hero photograph: the portrait used on her official YouTube thumbnails for
+   * the Muharram 1448 majalis (1st Majlis, 17 June 2026 —
+   * youtube.com/watch?v=DmzziMGF-a4), cropped above the poster's lettering.
+   * The source is 424×530; replace with the original photograph at full
+   * resolution when the client supplies it.
    */
   portrait: {
     src: "/images/portrait-muharram-1448.jpg",
     alt: "Zakia Batool Najafi",
     width: 424,
     height: 530,
-    caption: "Muharram 1448 · Birmingham",
   } as null | { src: string; alt: string; width: number; height: number; caption?: string },
 
   /** Contact email. Not supplied yet — email links stay hidden until it is set. */

@@ -110,6 +110,47 @@
     color: var(--color-brass-dark);
   }
 
+  /* Small status label used on lecture cards and the featured recording. */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: var(--color-sand);
+    color: var(--color-soft);
+  }
+  .badge-dot::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .badge-paid {
+    background: var(--color-sand);
+    color: var(--color-ink);
+  }
+  .badge-free {
+    background: var(--color-forest-tint);
+    color: var(--color-forest);
+  }
+  .badge-brass {
+    background: color-mix(in srgb, var(--color-brass) 16%, var(--color-ivory));
+    color: var(--color-brass-dark);
+  }
+
+  /* Cream panel on dark or sand surfaces. */
+  .panel {
+    background: var(--color-ivory);
+    border: 1px solid color-mix(in srgb, var(--color-brass) 22%, var(--color-line));
+    border-radius: 6px;
+  }
+
   .lead {
     font-family: var(--font-serif);
     font-size: 1.3125rem;
