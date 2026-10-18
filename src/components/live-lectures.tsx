@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import type { Lecture } from "@/content/lectures";
 import { formatDate, formatDuration, formatPrice, formatTime, timeZoneLabel } from "@/lib/format";
 import { getLecturesWithStatus } from "@/lib/lecture-data";
-import { statusLabel, type LectureStatus } from "@/lib/lecture-status";
+import type { LectureStatus } from "@/lib/lecture-status";
 import { ArrowRightIcon, BookOpenIcon, ClockIcon, GlobeIcon, HourglassIcon, ScreenIcon } from "./icons";
 
 export function LiveLectures() {
@@ -23,7 +23,15 @@ export function LiveLectures() {
         </div>
 
         <div className="mt-12">
-          <Suspense fallback={<p className="text-ivory/70">Loading lectures…</p>}>
+          <Suspense
+            fallback={
+              // Reserves the height of the finished content so the page doesn't jump
+              // (and links to sections further down land in the right place).
+              <div className="panel flex min-h-[348px] items-center p-8 text-soft md:min-h-[283px] md:p-10 lg:min-h-[195px]">
+                Loading lectures…
+              </div>
+            }
+          >
             <LectureList />
           </Suspense>
         </div>
@@ -39,20 +47,15 @@ function dateParts(lecture: Lecture) {
   return { day: part({ day: "2-digit" }), month: part({ month: "short" }), weekday: part({ weekday: "long" }) };
 }
 
-/** Badge text and style for a card. Open lectures show whether they are paid. */
-function badge(lecture: Lecture, status: LectureStatus): { text: string; className: string } {
-  if (status === "open") {
-    return lecture.price ? { text: "Paid", className: "badge-paid" } : { text: "Free", className: "badge-free" };
-  }
-  const text: Record<Exclude<LectureStatus, "open">, string> = {
-    upcoming: "Upcoming",
-    live: "Live now",
-    full: "Fully booked",
-    closed: "Closed",
-    completed: "Completed",
-  };
-  return { text: text[status], className: status === "live" ? "badge-free" : "badge-brass" };
-}
+/** Short status line for a card, set as a plain small-capitals label. The fee is shown separately. */
+const cardStatus: Record<LectureStatus, { text: string; tone: string }> = {
+  open: { text: "Registration open", tone: "text-forest" },
+  live: { text: "Live now", tone: "text-forest" },
+  upcoming: { text: "Opens soon", tone: "text-brass-dark" },
+  full: { text: "Fully booked", tone: "text-soft" },
+  closed: { text: "Registration closed", tone: "text-soft" },
+  completed: { text: "Completed", tone: "text-soft" },
+};
 
 async function LectureList() {
   const all = await getLecturesWithStatus();
@@ -87,13 +90,12 @@ async function LectureList() {
         {current.map(({ lecture, status }) => {
           const { day, month, weekday } = dateParts(lecture);
           const open = status === "open";
-          const label = badge(lecture, status);
+          const label = cardStatus[status];
           return (
             <li key={lecture.slug} className="panel relative flex flex-col p-6 text-ink md:p-7">
-              <span className={`badge badge-dot absolute right-5 top-5 ${label.className}`}>
+              <p className={`absolute right-6 top-7 text-[0.75rem] font-medium uppercase tracking-[0.12em] md:right-7 ${label.tone}`}>
                 {label.text}
-                <span className="sr-only"> — {statusLabel[status]}</span>
-              </span>
+              </p>
 
               <div className="grid grid-cols-[4.5rem_1fr] gap-x-3">
                 <time dateTime={lecture.startsAt} className="block pt-1 leading-none">

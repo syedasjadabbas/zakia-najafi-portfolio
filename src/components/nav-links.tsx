@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRightIcon } from "./icons";
 import { useEffect, useState } from "react";
 
 export type NavItem = { label: string; href: string; primary?: boolean };
@@ -43,7 +44,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
   const active = useActiveSection(items);
 
   return (
-    <ul className="flex items-center gap-x-9 text-[0.9688rem]">
+    <ul className="flex items-center gap-x-10 font-serif text-[1.125rem]">
       {items.map((item) => {
         const isActive = active === item.href.split("#")[1];
         return (
@@ -52,14 +53,17 @@ export function NavLinks({ items }: { items: NavItem[] }) {
               href={item.href}
               aria-current={isActive ? "location" : undefined}
               className={[
-                "relative inline-block py-2 transition-colors duration-200",
-                "after:absolute after:inset-x-0 after:bottom-0.5 after:h-px after:origin-left after:transition-transform after:duration-300",
-                item.primary ? "font-medium text-brass-light after:bg-brass-light" : "after:bg-white",
-                !item.primary && (isActive ? "text-white" : "text-white/70 hover:text-white"),
-                isActive ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100",
+                "relative inline-flex items-center gap-2.5 py-2 transition-colors duration-200",
+                "after:absolute after:left-0 after:bottom-0 after:h-px after:origin-left after:transition-transform after:duration-300",
+                item.primary
+                  ? "text-forest after:w-10 after:bg-forest after:transition-[width] hover:after:w-full"
+                  : "after:right-0 after:bg-ink",
+                !item.primary && (isActive ? "text-ink" : "text-ink/75 hover:text-ink"),
+                !item.primary && (isActive ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100"),
               ].join(" ")}
             >
               {item.label}
+              {item.primary ? <ArrowRightIcon size={17} className="arrow" /> : null}
             </Link>
           </li>
         );

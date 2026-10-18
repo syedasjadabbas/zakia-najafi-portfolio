@@ -33,7 +33,7 @@ export function About() {
         </div>
 
         <div className="lg:col-span-7 lg:pt-9">
-          <p className="text-[1.1875rem] leading-[1.7] text-ink md:text-[1.3125rem]">{first}</p>
+          <p className="max-w-[46rem] text-[1.1875rem] leading-[1.7] text-ink md:text-[1.3125rem]">{first}</p>
           {rest.length ? (
             <div className="mt-5 space-y-5 text-soft">
               {rest.map((text) => (

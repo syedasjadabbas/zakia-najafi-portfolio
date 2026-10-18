@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { ScrollReset } from "@/components/scroll-reset";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -50,12 +51,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1e1d1a",
+  themeColor: "#f8f4ec",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${newsreader.variable} ${plex.variable} ${amiri.variable} antialiased`}>
+      <head>
+        {/* On a refresh, stop the browser restoring the old scroll position or #section
+            before anything renders, so the page always opens at the top. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var n=performance.getEntriesByType('navigation')[0];if(n&&n.type==='reload'){history.scrollRestoration='manual';if(location.hash){history.replaceState(history.state,'',location.pathname+location.search)}window.scrollTo(0,0)}}catch(e){}",
+          }}
+        />
+      </head>
       <body className="min-h-dvh bg-ivory text-ink">
         <a
           href="#main"
@@ -63,6 +74,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        <ScrollReset />
         {children}
       </body>
     </html>

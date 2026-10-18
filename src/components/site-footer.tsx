@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/content/site";
 import { CurrentYear } from "./current-year";
@@ -8,9 +9,19 @@ export function SiteFooter() {
   return (
     <footer className="bg-forest-deep text-ivory">
       <div className="container-page grid items-center gap-8 py-10 md:py-12 lg:grid-cols-12">
-        <div className="lg:col-span-4">
-          <p className="font-serif text-[1.5rem] leading-tight">{site.name}</p>
-          <p className="mt-1 text-[0.9375rem] text-ivory/70">{site.qualification}</p>
+        <div className="flex items-center gap-4 lg:col-span-4">
+          <Image
+            src={site.logo.onDark.src}
+            alt=""
+            width={site.logo.onDark.width}
+            height={site.logo.onDark.height}
+            sizes="64px"
+            className="h-12 w-auto shrink-0"
+          />
+          <div>
+            <p className="font-serif text-[1.5rem] leading-tight">{site.name}</p>
+            <p className="mt-1 text-[0.9375rem] text-ivory/70">{site.qualification}</p>
+          </div>
         </div>
 
         <nav aria-label="Footer" className="lg:col-span-5">

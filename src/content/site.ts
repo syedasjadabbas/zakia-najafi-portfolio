@@ -62,6 +62,16 @@ export const site = {
     height: 530,
   } as null | { src: string; alt: string; width: number; height: number; caption?: string },
 
+  /**
+   * Approved ZB monogram. The supplied original is kept at
+   * /brand/zb-logo-original.webp; the transparent variants and the favicons are
+   * generated from it by scripts/make-logo-assets.py.
+   */
+  logo: {
+    onLight: { src: "/brand/zb-mark-on-light.png", width: 844, height: 710 },
+    onDark: { src: "/brand/zb-mark-on-dark.png", width: 844, height: 710 },
+  },
+
   /** Contact email. Not supplied yet — email links stay hidden until it is set. */
   email: null as string | null,
 

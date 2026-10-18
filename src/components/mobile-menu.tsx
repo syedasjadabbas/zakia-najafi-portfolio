@@ -48,7 +48,7 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
       {primary ? (
         <Link
           href={primary.href}
-          className="hidden whitespace-nowrap text-[0.9375rem] font-medium text-brass-light min-[420px]:inline"
+          className="hidden whitespace-nowrap text-[0.9375rem] font-medium text-forest min-[420px]:inline"
         >
           {primary.label}
         </Link>
@@ -60,7 +60,7 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((value) => !value)}
-        className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-end px-2 text-[0.9375rem] text-white/85 transition-colors hover:text-white"
+        className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-end px-2 text-[0.9375rem] text-ink transition-colors hover:text-forest"
       >
         {open ? "Close" : "Menu"}
       </button>
@@ -69,28 +69,28 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
         ref={panelRef}
         id={id}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-white/10 bg-ink"
+        className="absolute inset-x-0 top-full border-b border-line bg-ivory"
       >
         <nav aria-label="Main" className="container-page pb-8 pt-3">
           <ul>
             {ordered.map((item) => {
               const isActive = active === item.href.split("#")[1];
               return (
-                <li key={item.href} className="border-b border-white/10 last:border-b-0">
+                <li key={item.href} className="border-b border-line last:border-b-0">
                   <Link
                     href={item.href}
                     onClick={() => close(false)}
                     aria-current={isActive ? "location" : undefined}
                     className={[
                       "flex items-baseline justify-between py-4 font-serif text-[1.5rem] leading-tight",
-                      item.primary ? "text-brass-light" : "text-white",
+                      item.primary ? "text-forest" : "text-ink",
                     ].join(" ")}
                   >
                     {item.label}
                     {item.primary ? (
-                      <span className="font-sans text-[0.875rem] text-white/60">Upcoming sessions</span>
+                      <span className="font-sans text-[0.875rem] text-soft">Upcoming sessions</span>
                     ) : isActive ? (
-                      <span className="font-sans text-[0.875rem] text-white/60">You are here</span>
+                      <span className="font-sans text-[0.875rem] text-soft">You are here</span>
                     ) : null}
                   </Link>
                 </li>

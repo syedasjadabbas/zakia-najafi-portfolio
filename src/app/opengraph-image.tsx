@@ -8,10 +8,12 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
-  const [serif, sans] = await Promise.all([
+  const [serif, sans, mark] = await Promise.all([
     readFile(join(process.cwd(), "src/app/_fonts/newsreader-400.woff")),
     readFile(join(process.cwd(), "src/app/_fonts/plex-sans-400.woff")),
+    readFile(join(process.cwd(), "public/brand/zb-mark-on-light.png")),
   ]);
+  const markSrc = `data:image/png;base64,${mark.toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -27,7 +29,8 @@ export default async function OpenGraphImage() {
           color: "#1d1c19",
         }}
       >
-        <div style={{ display: "flex", width: 72, height: 2, background: "#46512f", marginBottom: 40 }} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- rendered by ImageResponse */}
+        <img src={markSrc} width={118} height={99} alt="" style={{ marginBottom: 44 }} />
         <div style={{ display: "flex", fontFamily: "Newsreader", fontSize: 92, lineHeight: 1.02, letterSpacing: -1.5 }}>
           {site.name}
         </div>

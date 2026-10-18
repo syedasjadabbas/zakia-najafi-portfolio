@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { site } from "@/content/site";
 import { videos, type Video } from "@/content/videos";
-import { ArrowRightIcon, PlayIcon } from "./icons";
+import { ArrowRightIcon } from "./icons";
 import { YouTubePlayer } from "./youtube-player";
 
 function meta(video: Video) {
@@ -38,7 +38,7 @@ export function Recordings() {
             <YouTubePlayer id={featured.id} title={featured.title} image={featured.image} duration={featured.duration} />
           </div>
           <figcaption className="lg:col-span-5">
-            <span className="badge badge-brass">Featured</span>
+            <p className="eyebrow">Featured recording</p>
             <h3 className="mt-4 text-[2.125rem] leading-tight md:text-[2.625rem]">{featured.label}</h3>
             <p className="mt-3 text-soft">
               {meta(featured)}
@@ -76,19 +76,15 @@ export function Recordings() {
                     unoptimized
                     className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   />
-                  <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-forest-deep/85 py-1 pl-1 pr-2.5 text-[0.75rem] tabular-nums text-ivory">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ivory text-forest">
-                      <PlayIcon size={8} className="ml-px" />
-                    </span>
-                    {video.duration}
-                  </span>
                 </span>
                 <span className="block sm:mt-4">
                   <span className="block font-serif text-[1.3125rem] leading-snug transition-colors group-hover:text-forest">
                     {video.label}
                   </span>
                   {meta(video) ? <span className="mt-1 block text-[0.9375rem] text-soft">{meta(video)}</span> : null}
-                  <span className="mt-0.5 block text-[0.875rem] text-soft">{video.date}</span>
+                  <span className="mt-0.5 block text-[0.875rem] tabular-nums text-soft">
+                    {video.date} · {video.duration}
+                  </span>
                   <span className="sr-only"> (opens YouTube in a new tab)</span>
                 </span>
               </a>

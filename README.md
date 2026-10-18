@@ -72,7 +72,6 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 | Consultation scope and how to request | `site.consultation.details` | One factual sentence |
 | Hero tagline (optional, e.g. the motto in the approved mock-up) | `site.heroTagline` | Not shown; no wording has been approved |
 | Domain | `NEXT_PUBLIC_SITE_URL` | Canonical URLs and sitemap point at localhost |
-| Approved logo or monogram | `src/app/icon.tsx` | Placeholder "Z" monogram favicon |
 | Privacy notice review | `src/app/privacy/page.tsx` | Plain description of what the site actually collects; not legal advice |
 
 No publications, testimonials or statistics are shown, and none were invented. Add a publications section only when real material exists.
@@ -82,5 +81,7 @@ No publications, testimonials or statistics are shown, and none were invented. A
 - A lecture URL that doesn't exist streams a "Page not found" page with `noindex`, but returns HTTP 200: with partial prerendering the static shell is sent before the lookup runs.
 - Revoking a confirmed Stripe registration in the admin does not issue a refund. Refund in the Stripe dashboard.
 - The Terms page (`/terms`) covers only how registration works. Fees, cancellation and refund terms must be supplied and reviewed before paid lectures go live.
+- Logo: the supplied ZB monogram is kept unchanged at `public/brand/zb-logo-original.webp`. `python scripts/make-logo-assets.py <original> <out-dir>` regenerates the transparent navbar and footer versions (`public/brand/zb-mark-on-*.png`) and the favicons (`src/app/icon.png`, `src/app/apple-icon.png`). Re-run it if the client sends a vector (SVG) version, which would be sharper still.
+- Hero: the background `public/images/hero-arch-background.webp` was supplied by the client (an empty arch scene, no person). Her portrait `public/images/portrait-muharram-1448-cutout.png` is her real thumbnail photo with the poster background removed by `scripts/make-portrait-cutout.py` (OpenCV GrabCut, which only traces the outline and does not generate pixels). Both are positioned from the arch centre at 72.9% of the background width.
 - Fonts (Newsreader, IBM Plex Sans, Amiri; OFL-1.1) are self-hosted from `src/app/_fonts/` via `next/font/local`. The Google Fonts loader fails to build in a folder whose path contains `&`, and self-hosting also keeps visitors off Google.
 - Brand icons in the contact section and footer come from Simple Icons v16.35.0 (CC0), stored in `src/components/brand-paths.ts`.
