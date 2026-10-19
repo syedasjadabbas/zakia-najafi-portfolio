@@ -47,15 +47,132 @@ function dateParts(lecture: Lecture) {
   return { day: part({ day: "2-digit" }), month: part({ month: "short" }), weekday: part({ weekday: "long" }) };
 }
 
-/** Short status line for a card, set as a plain small-capitals label. The fee is shown separately. */
-const cardStatus: Record<LectureStatus, { text: string; tone: string }> = {
-  open: { text: "Registration open", tone: "text-forest" },
-  live: { text: "Live now", tone: "text-forest" },
-  upcoming: { text: "Opens soon", tone: "text-brass-dark" },
-  full: { text: "Fully booked", tone: "text-soft" },
-  closed: { text: "Registration closed", tone: "text-soft" },
-  completed: { text: "Completed", tone: "text-soft" },
+/** Short status label. Fees are shown only inside registration, never here. */
+const statusText: Record<LectureStatus, string> = {
+  open: "Registration open",
+  live: "Live now",
+  upcoming: "Opens soon",
+  full: "Fully booked",
+  closed: "Registration closed",
+  completed: "Completed",
 };
+
+const actionText = (status: LectureStatus) => (status === "open" ? "Register" : "View details");
+
+function Meta({ lecture, tone }: { lecture: Lecture; tone: "light" | "dark" }) {
+  const icon = tone === "light" ? "text-brass-dark" : "text-brass-light";
+  const muted = tone === "light" ? "text-soft" : "text-ivory/70";
+  const items = [
+    { Icon: ClockIcon, label: "Time", value: <>{formatTime(lecture.startsAt, lecture.timeZone)} <span className={muted}>({timeZoneLabel(lecture.timeZone)})</span></> },
+    { Icon: HourglassIcon, label: "Duration", value: formatDuration(lecture.durationMinutes) },
+    { Icon: ScreenIcon, label: "Platform", value: lecture.platform },
+    { Icon: GlobeIcon, label: "Language", value: lecture.language },
+  ];
+  return (
+    <dl className="flex flex-wrap gap-x-6 gap-y-2 text-[0.9375rem]">
+      {items.map(({ Icon, label, value }) => (
+        <div key={label} className="flex items-center gap-2">
+          <dt className={icon}>
+            <Icon size={17} />
+            <span className="sr-only">{label}</span>
+          </dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** The next lecture, given a wide panel of its own. */
+function FeaturedLecture({ lecture, status }: { lecture: Lecture; status: LectureStatus }) {
+  const { day, month, weekday } = dateParts(lecture);
+  const open = status === "open";
+  return (
+    <article className="panel grid overflow-hidden text-ink lg:grid-cols-[13rem_1fr_17rem]">
+      <time
+        dateTime={lecture.startsAt}
+        className="flex items-baseline gap-4 border-b border-line px-7 py-6 lg:block lg:border-b-0 lg:border-r lg:px-8 lg:py-9"
+      >
+        <span className="block font-serif text-[3.5rem] leading-none text-brass-dark lg:text-[5rem]">{day}</span>
+        <span className="block lg:mt-3">
+          <span className="block text-[0.875rem] font-medium uppercase tracking-[0.14em] text-forest">{month}</span>
+          <span className="mt-0.5 block text-[0.9375rem] text-soft">{weekday}</span>
+        </span>
+      </time>
+
+      <div className="px-7 py-7 lg:px-10 lg:py-9">
+        <p className="eyebrow">Next lecture</p>
+        <h3 className="mt-3 text-[1.875rem] leading-[1.15] md:text-[2.25rem]">
+          <Link href={`/lectures/${lecture.slug}`} className="transition-colors hover:text-forest">
+            {lecture.title}
+          </Link>
+        </h3>
+        <p className="mt-3 max-w-[40rem] text-soft">{lecture.description}</p>
+        <div className="mt-6">
+          <Meta lecture={lecture} tone="light" />
+        </div>
+      </div>
+
+      <div className="flex flex-col justify-between gap-6 border-t border-line bg-sand/50 px-7 py-7 lg:border-l lg:border-t-0 lg:px-8 lg:py-9">
+        <div>
+          <p className={`text-[0.8125rem] font-medium uppercase tracking-[0.12em] ${open ? "text-forest" : "text-brass-dark"}`}>
+            {statusText[status]}
+          </p>
+          {open && lecture.registrationDeadline ? (
+            <p className="mt-2 text-[0.9375rem] text-soft">
+              Closes {formatDate(lecture.registrationDeadline, lecture.timeZone)}
+            </p>
+          ) : null}
+          {!lecture.paid ? <p className="mt-2 text-[0.9375rem] text-soft">Free admission</p> : null}
+        </div>
+        <Link href={`/lectures/${lecture.slug}`} className="button w-full justify-between">
+          {actionText(status)}
+          <span className="sr-only"> — {lecture.title}</span>
+          <ArrowRightIcon className="arrow" />
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+/** Later lectures, as rows of a printed programme. */
+function LectureRow({ lecture, status }: { lecture: Lecture; status: LectureStatus }) {
+  const { day, month, weekday } = dateParts(lecture);
+  return (
+    <li className="border-b border-ivory/15">
+      <Link
+        href={`/lectures/${lecture.slug}`}
+        className="group grid gap-x-8 gap-y-3 py-6 transition-colors hover:bg-ivory/[0.04] sm:grid-cols-[6rem_1fr] lg:grid-cols-[7rem_1fr_11rem_9rem] lg:items-center lg:px-2"
+      >
+        <time dateTime={lecture.startsAt} className="flex items-baseline gap-3 sm:block">
+          <span className="font-serif text-[2.25rem] leading-none text-brass-light">{day}</span>
+          <span className="text-[0.8125rem] uppercase tracking-[0.12em] text-ivory/80 sm:mt-1.5 sm:block">
+            {month} · {weekday.slice(0, 3)}
+          </span>
+        </time>
+        <div className="min-w-0">
+          <span className="block font-serif text-[1.5rem] leading-snug transition-colors group-hover:text-brass-light">
+            {lecture.title}
+          </span>
+          <div className="mt-2 text-ivory/85">
+            <Meta lecture={lecture} tone="dark" />
+          </div>
+        </div>
+        <span className="text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-ivory/70 sm:col-start-2 lg:col-start-auto">
+          {statusText[status]}
+          {!lecture.paid ? <span className="mt-1 block normal-case tracking-normal">Free admission</span> : null}
+        </span>
+        <span className="inline-flex items-center gap-2 font-serif text-[1.1875rem] sm:col-start-2 lg:col-start-auto lg:justify-end">
+          <span className="underline decoration-ivory/40 decoration-1 underline-offset-[0.35em] group-hover:decoration-ivory">
+            {actionText(status)}
+          </span>
+          <span className="sr-only"> — {lecture.title}</span>
+          <ArrowRightIcon size={16} className="arrow" />
+        </span>
+      </Link>
+    </li>
+  );
+}
 
 async function LectureList() {
   const all = await getLecturesWithStatus();
@@ -84,98 +201,22 @@ async function LectureList() {
     );
   }
 
+  const [next, ...later] = current;
+
   return (
     <div>
-      <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {current.map(({ lecture, status }) => {
-          const { day, month, weekday } = dateParts(lecture);
-          const open = status === "open";
-          const label = cardStatus[status];
-          return (
-            <li key={lecture.slug} className="panel relative flex flex-col p-6 text-ink md:p-7">
-              <p className={`absolute right-6 top-7 text-[0.75rem] font-medium uppercase tracking-[0.12em] md:right-7 ${label.tone}`}>
-                {label.text}
-              </p>
+      <FeaturedLecture lecture={next.lecture} status={next.status} />
 
-              <div className="grid grid-cols-[4.5rem_1fr] gap-x-3">
-                <time dateTime={lecture.startsAt} className="block pt-1 leading-none">
-                  <span className="block font-serif text-[2.625rem] text-brass-dark">{day}</span>
-                  <span className="mt-2 block text-[0.8125rem] font-medium uppercase tracking-[0.1em] text-forest">
-                    {month}
-                  </span>
-                  <span className="mt-1 block text-[0.8125rem] text-soft">{weekday}</span>
-                </time>
-                <div className="min-w-0 pt-9">
-                  <h3 className="text-[1.4375rem] leading-[1.2]">
-                    <Link href={`/lectures/${lecture.slug}`} className="transition-colors hover:text-forest">
-                      {lecture.title}
-                    </Link>
-                  </h3>
-                  <p className="mt-2 text-[0.9375rem] text-soft">{lecture.description}</p>
-                </div>
-              </div>
-
-              <dl className="mt-5 grid gap-2 text-[0.9375rem]">
-                <div className="flex items-center gap-2.5">
-                  <dt className="text-brass-dark">
-                    <ClockIcon size={18} />
-                    <span className="sr-only">Time</span>
-                  </dt>
-                  <dd>
-                    {formatTime(lecture.startsAt, lecture.timeZone)}{" "}
-                    <span className="text-soft">({timeZoneLabel(lecture.timeZone)})</span>
-                  </dd>
-                </div>
-                <div className="flex flex-wrap gap-x-5 gap-y-2">
-                  <div className="flex items-center gap-2.5">
-                    <dt className="text-brass-dark">
-                      <HourglassIcon size={18} />
-                      <span className="sr-only">Duration</span>
-                    </dt>
-                    <dd>{formatDuration(lecture.durationMinutes)}</dd>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <dt className="text-brass-dark">
-                      <ScreenIcon size={18} />
-                      <span className="sr-only">Platform</span>
-                    </dt>
-                    <dd>{lecture.platform}</dd>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <dt className="text-brass-dark">
-                      <GlobeIcon size={18} />
-                      <span className="sr-only">Language</span>
-                    </dt>
-                    <dd>{lecture.language}</dd>
-                  </div>
-                </div>
-              </dl>
-
-              {open && lecture.registrationDeadline ? (
-                <p className="mt-4 text-[0.875rem] text-soft">
-                  Registration closes {formatDate(lecture.registrationDeadline, lecture.timeZone)}
-                </p>
-              ) : null}
-
-              <div aria-hidden className="min-h-6 flex-1" />
-              {/* Fees are shown only inside registration, never on the card. */}
-              <div className="flex items-center justify-between gap-4 border-t border-line pt-5">
-                <Link
-                  href={`/lectures/${lecture.slug}`}
-                  className="group inline-flex min-h-11 items-center gap-2.5 font-serif text-[1.25rem] text-forest"
-                >
-                  <span className="underline decoration-forest/40 decoration-1 underline-offset-[0.35em] transition-[text-decoration-color] group-hover:decoration-forest">
-                    {open ? "Register" : "View details"}
-                  </span>
-                  <span className="sr-only"> — {lecture.title}</span>
-                  <ArrowRightIcon size={17} className="arrow" />
-                </Link>
-                {!lecture.paid ? <span className="text-[0.875rem] text-soft">Free admission</span> : null}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      {later.length ? (
+        <div className="mt-14">
+          <h3 className="eyebrow text-brass-light">Also coming up</h3>
+          <ul className="mt-5 border-t border-ivory/15">
+            {later.map(({ lecture, status }) => (
+              <LectureRow key={lecture.slug} lecture={lecture} status={status} />
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {past.length ? (
         <div className="mt-12">
