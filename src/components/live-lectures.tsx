@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Lecture } from "@/content/lectures";
-import { formatDate, formatDuration, formatPrice, formatTime, timeZoneLabel } from "@/lib/format";
+import { formatDate, formatDuration, formatTime, timeZoneLabel } from "@/lib/format";
 import { getLecturesWithStatus } from "@/lib/lecture-data";
 import type { LectureStatus } from "@/lib/lecture-status";
 import { ArrowRightIcon, BookOpenIcon, ClockIcon, GlobeIcon, HourglassIcon, ScreenIcon } from "./icons";
@@ -158,13 +158,19 @@ async function LectureList() {
               ) : null}
 
               <div aria-hidden className="min-h-6 flex-1" />
+              {/* Fees are shown only inside registration, never on the card. */}
               <div className="flex items-center justify-between gap-4 border-t border-line pt-5">
-                <p className="font-serif text-[1.625rem] leading-none">{formatPrice(lecture.price)}</p>
-                <Link href={`/lectures/${lecture.slug}`} className="button min-h-[2.75rem] px-4 py-2 text-[0.9375rem]">
-                  {open ? "Register" : "View details"}
+                <Link
+                  href={`/lectures/${lecture.slug}`}
+                  className="group inline-flex min-h-11 items-center gap-2.5 font-serif text-[1.25rem] text-forest"
+                >
+                  <span className="underline decoration-forest/40 decoration-1 underline-offset-[0.35em] transition-[text-decoration-color] group-hover:decoration-forest">
+                    {open ? "Register" : "View details"}
+                  </span>
                   <span className="sr-only"> — {lecture.title}</span>
-                  <ArrowRightIcon className="arrow" />
+                  <ArrowRightIcon size={17} className="arrow" />
                 </Link>
+                {!lecture.paid ? <span className="text-[0.875rem] text-soft">Free admission</span> : null}
               </div>
             </li>
           );

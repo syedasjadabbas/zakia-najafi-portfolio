@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getLecture } from "@/content/lectures";
-import { formatDate, formatDuration, formatPrice, formatTime, timeZoneLabel } from "@/lib/format";
+import { formatDate, formatDuration, formatTime, timeZoneLabel } from "@/lib/format";
 import { getLectureWithStatus } from "@/lib/lecture-data";
 import { statusLabel } from "@/lib/lecture-status";
-import { getManualInstructions, getPaymentProvider, isPaidRegistrationAvailable } from "@/lib/payments";
+import { getLiveMethodIds } from "@/lib/payment-gateways";
 import { RegistrationForm } from "./registration-form";
 
 export async function generateMetadata({ params }: PageProps<"/lectures/[slug]">): Promise<Metadata> {
@@ -52,7 +53,7 @@ async function LectureDetails({ params }: { params: PageProps<"/lectures/[slug]"
     ["Duration", formatDuration(lecture.durationMinutes)],
     ["Language", lecture.language],
     ["Online platform", lecture.platform],
-    ["Fee", formatPrice(lecture.price)],
+    ["Registration", lecture.paid ? "Paid, see payment options" : "Free"],
   ];
   if (lecture.registrationDeadline) {
     rows.push([
@@ -62,13 +63,12 @@ async function LectureDetails({ params }: { params: PageProps<"/lectures/[slug]"
   }
   rows.push(["Status", statusLabel[status]]);
 
-  const paidAvailable = lecture.price ? await isPaidRegistrationAvailable() : true;
-  const mode = !lecture.price ? "free" : getPaymentProvider();
-  const manualInstructions = mode === "manual" ? await getManualInstructions() : null;
+  const liveMethodIds = lecture.paid ? getLiveMethodIds() : [];
 
   return (
     <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-12">
-      <div className="lg:col-span-5">
+      {/* Stays in view beside the longer registration form on wide screens. */}
+      <div className="lg:sticky lg:top-28 lg:col-span-5 lg:self-start">
         <p className="eyebrow">Live lecture</p>
         <h1 className="mt-4 text-[2.5rem] leading-[1.06] tracking-[-0.018em] md:text-[3.25rem]">{lecture.title}</h1>
         <p className="lead mt-5 max-w-[30rem] text-soft">{lecture.description}</p>
@@ -80,25 +80,37 @@ async function LectureDetails({ params }: { params: PageProps<"/lectures/[slug]"
             </div>
           ))}
         </dl>
+
+        {/* A real frame from her recording of the 3rd Majlis, Muharram 1448 (youtube.com/watch?v=NEbP26zAs6s), used only here. */}
+        <figure className="mt-8 hidden max-w-[32rem] lg:block">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-sand">
+            <Image
+              src="/images/majlis-3-muharram-1448.jpg"
+              alt="Zakia Batool Najafi delivering a majlis"
+              fill
+              quality={90}
+              sizes="32rem"
+              className="object-cover"
+            />
+          </div>
+        </figure>
       </div>
 
       <section aria-labelledby="register-title" className="lg:col-span-6 lg:col-start-7 lg:pt-10">
         <h2 id="register-title" className="sr-only">
           Registration
         </h2>
-        {status === "open" && paidAvailable ? (
+        {status === "open" ? (
           <RegistrationForm
             slug={lecture.slug}
-            priceLabel={formatPrice(lecture.price)}
-            mode={mode}
-            manualInstructions={manualInstructions}
+            lectureTitle={lecture.title}
+            paid={lecture.paid}
+            liveMethodIds={liveMethodIds}
           />
         ) : (
           <div className="border-l-2 border-brass bg-sand px-6 py-7 md:px-8">
             <p className="font-serif text-[1.375rem] leading-relaxed">
-              {status === "open"
-                ? "Registration for this lecture will open shortly."
-                : status === "upcoming"
+              {status === "upcoming"
                   ? "Registration has not opened yet. Please check back soon."
                   : status === "full"
                     ? "This lecture is fully booked."

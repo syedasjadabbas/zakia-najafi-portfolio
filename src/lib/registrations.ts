@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Lecture } from "@/content/lectures";
+import type { Lecture, Price } from "@/content/lectures";
 import { getDb, isUniqueViolation, type Query } from "./db";
 import { getLectureStatus } from "./lecture-status";
 import { createAccessToken, hashToken, newId } from "./tokens";
@@ -12,7 +12,7 @@ export type RegistrationStatus =
   | "rejected"
   | "cancelled";
 
-export type PaymentMethod = "free" | "manual" | "stripe";
+export type PaymentMethod = "free" | "manual" | "stripe" | "jazzcash" | "easypaisa";
 
 export type Registration = {
   id: string;
@@ -21,6 +21,7 @@ export type Registration = {
   email: string;
   status: RegistrationStatus;
   payment_method: PaymentMethod;
+  whatsapp: string | null;
   amount_minor: number | null;
   currency: string | null;
   payment_reference: string | null;
@@ -29,7 +30,7 @@ export type Registration = {
   updated_at: Date;
 };
 
-const COLUMNS = `id, lecture_slug, name, email, status, payment_method, amount_minor, currency,
+const COLUMNS = `id, lecture_slug, name, email, whatsapp, status, payment_method, amount_minor, currency,
   payment_reference, stripe_session_id, created_at, updated_at`;
 
 /** Statuses that hold a place. */
@@ -53,9 +54,17 @@ export async function createRegistration(input: {
   email: string;
   method: PaymentMethod;
   paymentReference: string | null;
+  /** The fee charged (from the payment region chosen); null for free lectures. */
+  fee?: Price | null;
+  whatsapp?: string | null;
   now?: Date;
 }): Promise<CreateResult> {
   const { lecture, method } = input;
+  const fee = input.fee ?? null;
+  // A paid lecture can never be registered for free, and a free one never charges.
+  if (lecture.paid !== (method !== "free") || lecture.paid !== Boolean(fee)) {
+    return { ok: false, reason: "unavailable" };
+  }
   const db = await getDb();
   const token = createAccessToken();
   const id = newId();
@@ -75,18 +84,19 @@ export async function createRegistration(input: {
       }
       await q(
         `insert into registrations
-          (id, lecture_slug, name, email, status, payment_method, amount_minor, currency,
+          (id, lecture_slug, name, email, whatsapp, status, payment_method, amount_minor, currency,
            payment_reference, access_token_hash)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           id,
           lecture.slug,
           input.name,
           input.email,
+          input.whatsapp ?? null,
           status,
           method,
-          lecture.price?.amount ?? null,
-          lecture.price?.currency ?? null,
+          fee?.amount ?? null,
+          fee?.currency ?? null,
           input.paymentReference,
           hashToken(token),
         ],

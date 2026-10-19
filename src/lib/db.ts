@@ -42,6 +42,12 @@ create unique index if not exists registrations_unique_payment_reference
   on registrations (lower(payment_reference))
   where payment_reference is not null and status <> 'rejected';
 
+-- Optional WhatsApp number, and payment methods for future gateways (additive).
+alter table registrations add column if not exists whatsapp text;
+alter table registrations drop constraint if exists registrations_payment_method_check;
+alter table registrations add constraint registrations_payment_method_check
+  check (payment_method in ('free', 'manual', 'stripe', 'jazzcash', 'easypaisa'));
+
 create table if not exists lecture_access (
   lecture_slug text primary key,
   instructions text not null,

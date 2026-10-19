@@ -1,20 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { MethodOptions } from "@/components/payment/method-options";
+import { PaymentSummary } from "@/components/payment/payment-summary";
+import { RegionSelector } from "@/components/payment/region-selector";
+import {
+  getPaymentMethod,
+  getPaymentRegion,
+  paymentRegions,
+  paymentsComingSoonNotice,
+  type PaymentMethodId,
+  type PaymentRegionId,
+} from "@/lib/payment-options";
 import { register, type RegisterState } from "./actions";
 
 type Props = {
   slug: string;
-  priceLabel: string;
-  mode: "free" | "manual" | "stripe";
-  manualInstructions: string | null;
+  lectureTitle: string;
+  paid: boolean;
+  /** Methods whose gateway is live and configured on the server. */
+  liveMethodIds: PaymentMethodId[];
 };
 
-export function RegistrationForm({ slug, priceLabel, mode, manualInstructions }: Props) {
+export function RegistrationForm({ slug, lectureTitle, paid, liveMethodIds }: Props) {
   const [state, action, pending] = useActionState<RegisterState, FormData>(register.bind(null, slug), {});
   const errors = state.errors ?? {};
   const formRef = useRef<HTMLFormElement>(null);
+
+  const [regionId, setRegionId] = useState<PaymentRegionId | null>(
+    (state.values?.region as PaymentRegionId | undefined) ?? null,
+  );
+  const [methodId, setMethodId] = useState<PaymentMethodId | null>(null);
+  const region = getPaymentRegion(regionId) ?? null;
+  const method = region ? (getPaymentMethod(region, methodId) ?? null) : null;
+  const regionHasLiveMethod = Boolean(region?.methods.some((m) => liveMethodIds.includes(m.id)));
+  const canProceed = Boolean(region && method && liveMethodIds.includes(method.id));
+
+  function chooseRegion(id: PaymentRegionId) {
+    setRegionId(id);
+    // Preselect the first available method in the new region, if any.
+    const next = getPaymentRegion(id)?.methods.find((m) => liveMethodIds.includes(m.id));
+    setMethodId(next?.id ?? null);
+  }
 
   // After a failed submission, move focus to the first problem so it is seen and announced.
   useEffect(() => {
@@ -28,53 +56,47 @@ export function RegistrationForm({ slug, priceLabel, mode, manualInstructions }:
   }, [state]);
 
   return (
-    <form ref={formRef} action={action} noValidate className="space-y-10">
+    <form ref={formRef} action={action} noValidate className="space-y-12">
       <fieldset className="space-y-5">
         <legend className="font-serif text-[1.75rem] leading-tight">Your details</legend>
-        <Field
-          name="name"
-          label="Full name"
-          autoComplete="name"
-          defaultValue={state.values?.name}
-          error={errors.name}
-        />
+        <Field name="name" label="Full name" autoComplete="name" defaultValue={state.values?.name} error={errors.name} />
         <Field
           name="email"
           type="email"
           label="Email address"
-          hint="Confirmation and joining details are linked to this address."
+          hint="Your confirmation and joining details are linked to this address."
           autoComplete="email"
           defaultValue={state.values?.email}
           error={errors.email}
         />
+        <Field
+          name="whatsapp"
+          type="tel"
+          label="WhatsApp number"
+          optional
+          hint="Include your country code, for example +92 300 1234567."
+          autoComplete="tel"
+          inputMode="tel"
+          defaultValue={state.values?.whatsapp}
+          error={errors.whatsapp}
+        />
       </fieldset>
 
-      {mode === "manual" ? (
-        <fieldset className="space-y-5">
-          <legend className="font-serif text-[1.75rem] leading-tight">Payment · {priceLabel}</legend>
-          <div className="whitespace-pre-line border-l-2 border-brass bg-sand px-5 py-4 text-[0.9688rem]">
-            {manualInstructions}
-          </div>
-          <Field
-            name="reference"
-            label="Transaction reference"
-            hint="The transaction ID or reference shown on your payment receipt."
-            autoComplete="off"
-            defaultValue={state.values?.reference}
-            error={errors.reference}
-          />
-          <p className="text-[0.875rem] text-soft">
-            Your place is confirmed once the payment has been verified. Joining instructions appear on your
-            private registration page after confirmation.
-          </p>
-        </fieldset>
-      ) : null}
+      {paid ? (
+        <>
+          <RegionSelector regions={paymentRegions} value={regionId} onChange={chooseRegion} error={errors.region} />
 
-      {mode === "stripe" ? (
-        <p className="text-[0.9375rem] text-soft">
-          You will be taken to a secure Stripe page to pay {priceLabel}. Your place is confirmed when the
-          payment is complete.
-        </p>
+          {region ? (
+            <MethodOptions
+              methods={region.methods}
+              liveMethodIds={liveMethodIds}
+              value={methodId}
+              onChange={setMethodId}
+            />
+          ) : null}
+
+          <PaymentSummary lectureTitle={lectureTitle} region={region} method={method} />
+        </>
       ) : null}
 
       {/* Honeypot field, hidden from people and assistive technology. */}
@@ -90,23 +112,48 @@ export function RegistrationForm({ slug, priceLabel, mode, manualInstructions }:
             {state.message}
           </p>
         ) : null}
-        <button type="submit" className="button w-full sm:w-auto" disabled={pending} data-pending={pending}>
-          {pending ? (
-            <span
-              aria-hidden
-              className="h-4 w-4 animate-spin rounded-full border-2 border-ivory/40 border-t-ivory motion-reduce:animate-none"
-            />
-          ) : null}
-          {pending
-            ? "Submitting…"
-            : mode === "stripe"
-              ? "Continue to payment"
-              : mode === "manual"
-                ? "Submit registration"
-                : "Register"}
-        </button>
+
+        {paid ? (
+          <>
+            <button
+              type="submit"
+              className="button w-full sm:w-auto"
+              disabled={!canProceed || pending}
+              aria-describedby="payment-status"
+              data-pending={pending}
+            >
+              {pending ? (
+                <span
+                  aria-hidden
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-ivory/40 border-t-ivory motion-reduce:animate-none"
+                />
+              ) : null}
+              {pending ? "Opening secure payment…" : "Proceed to payment"}
+            </button>
+            <p id="payment-status" className="text-[0.9375rem] text-soft">
+              {region && !regionHasLiveMethod
+                ? paymentsComingSoonNotice
+                : !region
+                  ? "Choose where you are paying from to see the fee."
+                  : !method
+                    ? "Choose a payment method to continue."
+                    : "You will complete payment on the provider’s secure page. Your place is confirmed once payment is verified."}
+            </p>
+          </>
+        ) : (
+          <button type="submit" className="button w-full sm:w-auto" disabled={pending} data-pending={pending}>
+            {pending ? (
+              <span
+                aria-hidden
+                className="h-4 w-4 animate-spin rounded-full border-2 border-ivory/40 border-t-ivory motion-reduce:animate-none"
+              />
+            ) : null}
+            {pending ? "Registering…" : "Register"}
+          </button>
+        )}
+
         <p className="text-[0.875rem] text-soft">
-          Your name and email are used only for this registration. See the{" "}
+          Your details are used only for this registration. See the{" "}
           <Link href="/privacy" className="link">
             privacy notice
           </Link>
@@ -122,16 +169,20 @@ function Field({
   label,
   hint,
   error,
+  optional = false,
   type = "text",
   autoComplete,
+  inputMode,
   defaultValue,
 }: {
   name: string;
   label: string;
   hint?: string;
   error?: string;
+  optional?: boolean;
   type?: string;
   autoComplete?: string;
+  inputMode?: "tel" | "email" | "text";
   defaultValue?: string;
 }) {
   const describedBy = [hint ? `${name}-hint` : null, error ? `${name}-error` : null].filter(Boolean).join(" ");
@@ -139,6 +190,7 @@ function Field({
     <div className="max-w-[28rem]">
       <label htmlFor={name} className="block text-[0.9375rem] font-medium">
         {label}
+        {optional ? <span className="font-normal text-soft"> (optional)</span> : null}
       </label>
       {hint ? (
         <p id={`${name}-hint`} className="mt-0.5 text-[0.875rem] text-soft">
@@ -149,8 +201,9 @@ function Field({
         id={name}
         name={name}
         type={type}
-        required
+        required={!optional}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         defaultValue={defaultValue}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}

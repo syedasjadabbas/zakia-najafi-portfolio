@@ -45,6 +45,7 @@ async function pendingStripeRegistration(slug: string, sessionId: string) {
     email: `${slug}@example.com`,
     method: "stripe",
     paymentReference: null,
+    fee: { amount: 1000, currency: "GBP" },
     now: new Date("2030-01-01T00:00:00Z"),
   });
   if (!res.ok) throw new Error("setup failed");

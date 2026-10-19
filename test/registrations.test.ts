@@ -14,7 +14,7 @@ beforeAll(async () => {
 
 describe("registrations", () => {
   it("confirms free registrations immediately and finds them by token only", async () => {
-    const free = lecture({ slug: "free", price: null });
+    const free = lecture({ slug: "free", paid: false });
     const result = await r.createRegistration({
       lecture: free,
       name: "A",
@@ -30,7 +30,7 @@ describe("registrations", () => {
   });
 
   it("rejects a second active registration for the same email, ignoring case", async () => {
-    const l = lecture({ slug: "dup", price: null });
+    const l = lecture({ slug: "dup", paid: false });
     await r.createRegistration({ lecture: l, name: "B", email: "b@example.com", method: "free", paymentReference: null, now });
     const again = await r.createRegistration({
       lecture: l,
@@ -51,6 +51,7 @@ describe("registrations", () => {
       email: "c@example.com",
       method: "manual",
       paymentReference: "TX-123",
+      fee: { amount: 500, currency: "PKR" },
       now,
     });
     expect(first.ok && first.status).toBe("pending_verification");
@@ -60,13 +61,14 @@ describe("registrations", () => {
       email: "d@example.com",
       method: "manual",
       paymentReference: "tx-123",
+      fee: { amount: 500, currency: "PKR" },
       now,
     });
     expect(reused).toEqual({ ok: false, reason: "reference-used" });
   });
 
   it("never exceeds capacity, even with concurrent submissions", async () => {
-    const l = lecture({ slug: "small", price: null, capacity: 3 });
+    const l = lecture({ slug: "small", paid: false, capacity: 3 });
     const results = await Promise.all(
       Array.from({ length: 8 }, (_, i) =>
         r.createRegistration({
@@ -84,7 +86,7 @@ describe("registrations", () => {
   });
 
   it("refuses registration when the lecture is not open", async () => {
-    const closed = lecture({ slug: "closed", registration: "closed", price: null });
+    const closed = lecture({ slug: "closed", registration: "closed", paid: false });
     const res = await r.createRegistration({
       lecture: closed,
       name: "F",
@@ -104,6 +106,7 @@ describe("registrations", () => {
       email: "e@example.com",
       method: "manual",
       paymentReference: "TX-9",
+      fee: { amount: 200, currency: "USD" },
       now,
     });
     if (!res.ok) throw new Error("setup failed");
@@ -116,5 +119,41 @@ describe("registrations", () => {
     expect(await r.getAccessInstructions("paid")).toBe("https://zoom.example/j/1");
     await r.setAccessInstructions("paid", "  ");
     expect(await r.getAccessInstructions("paid")).toBeNull();
+  });
+  it("never registers a paid lecture for free, or charges for a free one", async () => {
+    const paid = lecture({ slug: "guard-paid" });
+    const free = lecture({ slug: "guard-free", paid: false });
+    const asFree = await r.createRegistration({ lecture: paid, name: "G", email: "g@example.com", method: "free", paymentReference: null, now });
+    const noFee = await r.createRegistration({ lecture: paid, name: "G", email: "g@example.com", method: "jazzcash", paymentReference: null, now });
+    const charged = await r.createRegistration({
+      lecture: free,
+      name: "G",
+      email: "g@example.com",
+      method: "free",
+      paymentReference: null,
+      fee: { amount: 500, currency: "PKR" },
+      now,
+    });
+    expect([asFree, noFee, charged]).toEqual([
+      { ok: false, reason: "unavailable" },
+      { ok: false, reason: "unavailable" },
+      { ok: false, reason: "unavailable" },
+    ]);
+  });
+
+  it("stores the optional WhatsApp number and the chosen regional fee", async () => {
+    const res = await r.createRegistration({
+      lecture: lecture({ slug: "whatsapp" }),
+      name: "W",
+      email: "w@example.com",
+      whatsapp: "+923001234567",
+      method: "jazzcash",
+      paymentReference: null,
+      fee: { amount: 500, currency: "PKR" },
+      now,
+    });
+    if (!res.ok) throw new Error("setup failed");
+    const saved = await r.getRegistrationByToken(res.token);
+    expect(saved).toMatchObject({ whatsapp: "+923001234567", amount_minor: 500, currency: "PKR", status: "pending_payment" });
   });
 });

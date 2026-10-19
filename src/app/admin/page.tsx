@@ -6,7 +6,8 @@ import { getLectures } from "@/content/lectures";
 import { isAdmin, isAdminConfigured } from "@/lib/admin-auth";
 import { isEmailConfigured } from "@/lib/email";
 import { formatPrice, formatShortDate, formatTime } from "@/lib/format";
-import { getPaymentProvider } from "@/lib/payments";
+import { getLiveMethodIds } from "@/lib/payment-gateways";
+import { allPaymentMethods } from "@/lib/payment-options";
 import {
   getAllAccessInstructions,
   listRegistrations,
@@ -92,7 +93,11 @@ async function Dashboard() {
       </div>
 
       <p className="-mt-12 text-[0.875rem] text-soft">
-        Payments: {getPaymentProvider() === "stripe" ? "Stripe Checkout" : "manual verification"} · Email:{" "}
+        Online payments:{" "}
+        {allPaymentMethods
+          .map((m) => `${m.label} ${getLiveMethodIds().includes(m.id) ? "live" : "coming soon"}`)
+          .join(", ")}{" "}
+        · Email:{" "}
         {isEmailConfigured() ? "sending" : "not configured (registrants rely on their private link)"}
       </p>
 
@@ -128,7 +133,7 @@ async function Dashboard() {
                     <p className="font-serif text-[1.25rem]">{lecture.title}</p>
                     <p className="mt-1 text-[0.875rem] text-soft">
                       {formatShortDate(lecture.startsAt, lecture.timeZone)} ·{" "}
-                      {formatTime(lecture.startsAt, lecture.timeZone)} · {formatPrice(lecture.price)}
+                      {formatTime(lecture.startsAt, lecture.timeZone)} · {lecture.paid ? "Paid" : "Free"}
                     </p>
                     <p className="mt-1 text-[0.875rem] text-soft">
                       {confirmed} confirmed{lecture.capacity ? ` of ${lecture.capacity}` : ""} · {forLecture.length}{" "}
@@ -197,6 +202,12 @@ function RegistrationTable({ rows, titles }: { rows: Registration[]; titles: Map
                 {r.name}
                 <br />
                 <span className="text-soft">{r.email}</span>
+                {r.whatsapp ? (
+                  <>
+                    <br />
+                    <span className="text-soft">WhatsApp {r.whatsapp}</span>
+                  </>
+                ) : null}
               </td>
               <td className="py-3 pr-4">{titles.get(r.lecture_slug) ?? r.lecture_slug}</td>
               <td className="py-3 pr-4">
@@ -209,7 +220,12 @@ function RegistrationTable({ rows, titles }: { rows: Registration[]; titles: Map
                     <span className="break-all font-mono text-soft">{r.payment_reference}</span>
                   </>
                 ) : null}
-                {r.payment_method === "stripe" ? <span className="text-soft"> · Stripe</span> : null}
+                {r.payment_method !== "free" && r.payment_method !== "manual" ? (
+                  <span className="text-soft">
+                    {" "}
+                    · {{ stripe: "Card", jazzcash: "JazzCash", easypaisa: "Easypaisa" }[r.payment_method]}
+                  </span>
+                ) : null}
               </td>
               <td className="py-3 pr-4">
                 {statusText[r.status]}

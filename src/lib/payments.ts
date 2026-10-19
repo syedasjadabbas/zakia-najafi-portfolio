@@ -1,42 +1,19 @@
 import "server-only";
 
 import type Stripe from "stripe";
-import type { Lecture } from "@/content/lectures";
-import { site } from "@/content/site";
+import type { Lecture, Price } from "@/content/lectures";
 
 /**
- * Payment provider selection.
- *
- * PAYMENT_PROVIDER=manual (default) — visitors pay using the instructions in
- *   src/content/site.ts, submit a transaction reference, and an administrator
- *   approves or rejects the registration at /admin.
- * PAYMENT_PROVIDER=stripe — Stripe Checkout. Registrations are confirmed only
- *   by a signature-verified webhook whose amount and currency match.
+ * Stripe Checkout helpers, used by the "card" gateway in payment-gateways.ts.
+ * Registrations are confirmed only by the signature-verified webhook at
+ * /api/stripe/webhook, after amount and currency are checked.
  */
 
-export type PaymentProvider = "manual" | "stripe";
-
-export function getPaymentProvider(): PaymentProvider {
-  return process.env.PAYMENT_PROVIDER === "stripe" ? "stripe" : "manual";
-}
-
-export async function getManualInstructions(): Promise<string | null> {
-  if (site.payment.manualInstructions) return site.payment.manualInstructions;
-  if (process.env.NODE_ENV !== "production" && process.env.SHOW_EXAMPLE_LECTURES === "true") {
-    return (await import("@/content/lectures.example")).exampleManualInstructions;
-  }
-  return null;
-}
-
-/** Whether paid registration can be offered at all with the current configuration. */
-export async function isPaidRegistrationAvailable(): Promise<boolean> {
-  if (getPaymentProvider() === "stripe") {
-    return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET);
-  }
-  return Boolean(await getManualInstructions());
-}
-
 let stripeClient: Stripe | null = null;
+
+export function isStripeConfigured(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET);
+}
 
 export async function getStripe(): Promise<Stripe> {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
@@ -49,13 +26,13 @@ export async function getStripe(): Promise<Stripe> {
 
 export async function createCheckoutSession(input: {
   lecture: Lecture;
+  fee: Price;
   registrationId: string;
   email: string;
   returnUrl: string;
   cancelUrl: string;
 }): Promise<{ id: string; url: string }> {
-  const { lecture } = input;
-  if (!lecture.price) throw new Error("Lecture is free");
+  const { lecture, fee } = input;
   const stripe = await getStripe();
   const session = await stripe.checkout.sessions.create(
     {
@@ -67,8 +44,8 @@ export async function createCheckoutSession(input: {
         {
           quantity: 1,
           price_data: {
-            currency: lecture.price.currency.toLowerCase(),
-            unit_amount: lecture.price.amount,
+            currency: fee.currency.toLowerCase(),
+            unit_amount: fee.amount,
             product_data: { name: lecture.title },
           },
         },

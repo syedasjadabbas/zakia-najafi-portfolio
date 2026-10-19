@@ -112,13 +112,4 @@ export const site = {
     /** Scope, format and availability of consultations. `null` until supplied. */
     details: null as string | null,
   },
-
-  payment: {
-    /**
-     * Shown to visitors registering for a paid lecture when PAYMENT_PROVIDER is
-     * "manual" (the default). Bank or wallet details, the exact reference to
-     * use, and any notes. Paid registration stays unavailable while this is null.
-     */
-    manualInstructions: null as string | null,
-  },
 };

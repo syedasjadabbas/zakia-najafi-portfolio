@@ -17,13 +17,13 @@ export const exampleLectures: Lecture[] = [
   {
     slug: "example-paid-lecture",
     title: "[Example] Paid online lecture",
-    description: "Sample entry for testing registration with manual payment verification.",
+    description: "Sample entry for testing the paid registration and payment selection.",
     startsAt: daysFromNow(14),
     durationMinutes: 90,
     timeZone: "Europe/London",
     language: "Urdu",
     platform: "Zoom",
-    price: { amount: 1000, currency: "GBP" },
+    paid: true,
     capacity: 50,
     registrationDeadline: daysFromNow(13),
     registration: "open",
@@ -37,7 +37,7 @@ export const exampleLectures: Lecture[] = [
     timeZone: "Asia/Karachi",
     language: "English",
     platform: "Google Meet",
-    price: null,
+    paid: false,
     registration: "open",
   },
   {
@@ -49,10 +49,8 @@ export const exampleLectures: Lecture[] = [
     timeZone: "Europe/London",
     language: "Urdu",
     platform: "Zoom",
-    price: { amount: 1500, currency: "GBP" },
+    paid: true,
     registration: "not-yet-open",
   },
 ];
 
-export const exampleManualInstructions =
-  "EXAMPLE ONLY — replace in src/content/site.ts.\nTransfer the fee to: Example Bank, account 00000000.\nUse your full name as the payment reference, then enter the transaction ID below.";

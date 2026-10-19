@@ -10,7 +10,7 @@ export function lecture(overrides: Partial<Lecture> = {}): Lecture {
     timeZone: "Europe/London",
     language: "Urdu",
     platform: "Zoom",
-    price: { amount: 1000, currency: "GBP" },
+    paid: true,
     registration: "open",
     ...overrides,
   };

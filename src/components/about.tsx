@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { site } from "@/content/site";
 import { videos } from "@/content/videos";
 import { MortarboardIcon, PinIcon } from "./icons";
@@ -30,6 +31,20 @@ export function About() {
           <h2 id="about-title" className="mt-4 text-[2.375rem] leading-[1.08] tracking-[-0.015em] md:text-[3rem]">
             Teaching the Islamic sciences
           </h2>
+
+          {/* A real frame from her recording of the 3rd Majlis, Safar 1444 (youtube.com/watch?v=vTXe_Vp_10U). */}
+          <figure className="mt-10 max-w-[30rem]">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-sand">
+              <Image
+                src="/images/majlis-safar-1444-mwa.jpg"
+                alt="Zakia Batool Najafi delivering a majlis"
+                fill
+                quality={90}
+                sizes="(min-width: 1024px) 30rem, 100vw"
+                className="object-cover"
+              />
+            </div>
+          </figure>
         </div>
 
         <div className="lg:col-span-7 lg:pt-9">

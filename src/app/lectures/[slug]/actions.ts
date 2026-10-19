@@ -6,46 +6,40 @@ import { getLecture } from "@/content/lectures";
 import { site } from "@/content/site";
 import { sendEmail } from "@/lib/email";
 import { formatDate, formatTime } from "@/lib/format";
-import { createCheckoutSession, getPaymentProvider, isPaidRegistrationAvailable } from "@/lib/payments";
-import {
-  attachStripeSession,
-  createRegistration,
-  transitionRegistration,
-  type PaymentMethod,
-} from "@/lib/registrations";
+import { getGateway } from "@/lib/payment-gateways";
+import { getPaymentMethod, getPaymentRegion, paymentsComingSoonNotice } from "@/lib/payment-options";
+import { createRegistration, transitionRegistration, type PaymentMethod } from "@/lib/registrations";
 
 export type RegisterState = {
   message?: string;
-  errors?: Partial<Record<"name" | "email" | "reference", string>>;
-  values?: { name: string; email: string; reference: string };
+  errors?: Partial<Record<"name" | "email" | "whatsapp" | "region" | "method", string>>;
+  values?: { name: string; email: string; whatsapp: string; region: string };
 };
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please enter your full name.").max(120, "Please shorten your name."),
   email: z.email("Please enter a valid email address.").trim().toLowerCase().max(200),
-  reference: z.string().trim().max(120, "The reference is too long."),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(24, "Please check the WhatsApp number.")
+    .refine((v) => v === "" || /^\+?[0-9][0-9\s-]{6,20}$/.test(v), "Please enter a valid WhatsApp number, or leave it empty."),
 });
 
 export async function register(slug: string, _prev: RegisterState, formData: FormData): Promise<RegisterState> {
   const raw = {
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),
-    reference: String(formData.get("reference") ?? ""),
+    whatsapp: String(formData.get("whatsapp") ?? ""),
+    region: String(formData.get("region") ?? ""),
   };
+  const methodId = String(formData.get("method") ?? "");
 
   // Honeypot: real visitors never fill this hidden field.
   if (formData.get("website")) return { message: "Your registration could not be submitted." };
 
   const lecture = await getLecture(slug);
   if (!lecture) return { message: "This lecture could not be found." };
-
-  let method: PaymentMethod = "free";
-  if (lecture.price) {
-    if (!(await isPaidRegistrationAvailable())) {
-      return { message: "Registration for this lecture is not available yet.", values: raw };
-    }
-    method = getPaymentProvider() === "stripe" ? "stripe" : "manual";
-  }
 
   // Report every field problem in one pass.
   const parsed = schema.safeParse(raw);
@@ -56,56 +50,76 @@ export async function register(slug: string, _prev: RegisterState, formData: For
       errors[key] ??= issue.message;
     }
   }
-  if (method === "manual" && raw.reference.trim().length < 4) {
-    errors.reference ??= "Please enter the transaction reference from your payment.";
-  }
+
+  const region = lecture.paid ? getPaymentRegion(raw.region) : undefined;
+  if (lecture.paid && !region) errors.region = "Please choose where you are paying from.";
   if (!parsed.success || Object.keys(errors).length) return { errors, values: raw };
+
+  const whatsapp = parsed.data.whatsapp.replace(/[\s-]/g, "") || null;
+
+  // Free lectures: confirmed immediately, as before.
+  if (!lecture.paid) {
+    const result = await createRegistration({
+      lecture,
+      name: parsed.data.name,
+      email: parsed.data.email,
+      whatsapp,
+      method: "free",
+      paymentReference: null,
+    });
+    if (!result.ok) return { message: failureMessage(result.reason), values: raw };
+    const statusUrl = `${site.url}/registration/${result.token}`;
+    await sendRegistrationEmail(parsed.data.email, parsed.data.name, lecture.title, statusUrl, "free", {
+      when: `${formatDate(lecture.startsAt, lecture.timeZone)}, ${formatTime(lecture.startsAt, lecture.timeZone)}`,
+    });
+    redirect(`/registration/${result.token}`);
+  }
+
+  // Paid lectures: only through a live, configured gateway. Nothing is ever
+  // confirmed here; the gateway's verified callback does that.
+  const method = region ? getPaymentMethod(region, methodId) : undefined;
+  const gateway = method ? getGateway(method.id) : null;
+  if (!region || !gateway) return { message: paymentsComingSoonNotice, values: raw };
 
   const result = await createRegistration({
     lecture,
     name: parsed.data.name,
     email: parsed.data.email,
-    method,
-    paymentReference: method === "manual" ? parsed.data.reference : null,
+    whatsapp,
+    method: gateway.storedAs,
+    fee: region.fee,
+    paymentReference: null,
   });
-
-  if (!result.ok) {
-    const message = {
-      unavailable: "Registration for this lecture is no longer open.",
-      duplicate:
-        "This email address is already registered for this lecture. Please use the private link you received when you registered.",
-      "reference-used": "This transaction reference has already been used for another registration.",
-    }[result.reason];
-    return { message, values: raw };
-  }
+  if (!result.ok) return { message: failureMessage(result.reason), values: raw };
 
   const statusUrl = `${site.url}/registration/${result.token}`;
-
-  if (method === "stripe") {
-    let checkoutUrl: string;
-    try {
-      const session = await createCheckoutSession({
-        lecture,
-        registrationId: result.id,
-        email: parsed.data.email,
-        returnUrl: statusUrl,
-        cancelUrl: `${site.url}/lectures/${lecture.slug}`,
-      });
-      await attachStripeSession(result.id, session.id);
-      checkoutUrl = session.url;
-    } catch (error) {
-      console.error("Stripe checkout failed", error);
-      await transitionRegistration(result.id, ["pending_payment"], "cancelled");
-      return { message: "The payment page could not be opened. Please try again shortly.", values: raw };
-    }
-    await sendRegistrationEmail(parsed.data.email, parsed.data.name, lecture.title, statusUrl, method);
-    redirect(checkoutUrl);
+  let redirectUrl: string;
+  try {
+    ({ redirectUrl } = await gateway.startCheckout({
+      registrationId: result.id,
+      lecture,
+      fee: region.fee,
+      name: parsed.data.name,
+      email: parsed.data.email,
+      returnUrl: statusUrl,
+      cancelUrl: `${site.url}/lectures/${lecture.slug}`,
+    }));
+  } catch (error) {
+    console.error(`Checkout failed (${gateway.id})`, error);
+    await transitionRegistration(result.id, ["pending_payment"], "cancelled");
+    return { message: "The payment page could not be opened. Please try again shortly.", values: raw };
   }
+  await sendRegistrationEmail(parsed.data.email, parsed.data.name, lecture.title, statusUrl, gateway.storedAs);
+  redirect(redirectUrl);
+}
 
-  await sendRegistrationEmail(parsed.data.email, parsed.data.name, lecture.title, statusUrl, method, {
-    when: `${formatDate(lecture.startsAt, lecture.timeZone)}, ${formatTime(lecture.startsAt, lecture.timeZone)}`,
-  });
-  redirect(`/registration/${result.token}`);
+function failureMessage(reason: "unavailable" | "duplicate" | "reference-used") {
+  return {
+    unavailable: "Registration for this lecture is no longer open.",
+    duplicate:
+      "This email address is already registered for this lecture. Please use the private link you received when you registered.",
+    "reference-used": "This payment reference has already been used for another registration.",
+  }[reason];
 }
 
 async function sendRegistrationEmail(
@@ -116,11 +130,12 @@ async function sendRegistrationEmail(
   method: PaymentMethod,
   extra?: { when?: string },
 ) {
-  const status = {
-    free: "Your place is confirmed.",
-    manual: "Your payment reference has been received and will be verified shortly.",
-    stripe: "Your registration will be confirmed as soon as payment is complete.",
-  }[method];
+  const status =
+    method === "free"
+      ? "Your place is confirmed."
+      : method === "manual"
+        ? "Your payment reference has been received and will be verified shortly."
+        : "Your registration will be confirmed as soon as your payment is verified.";
   await sendEmail({
     to,
     subject: `Registration: ${title}`,
@@ -133,7 +148,7 @@ async function sendRegistrationEmail(
       "Your private registration page shows your status and, once confirmed, the joining instructions:",
       statusUrl,
       "",
-      "Please keep this link to yourself — it gives access to your registration.",
+      "Please keep this link to yourself, as it gives access to your registration.",
       "",
       site.name,
     ].join("\n"),

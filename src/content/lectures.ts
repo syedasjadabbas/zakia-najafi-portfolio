@@ -16,7 +16,7 @@
  *     timeZone: "Europe/London",                  // shown to visitors
  *     language: "Urdu",
  *     platform: "Zoom",
- *     price: { amount: 1000, currency: "GBP" },   // minor units (1000 = £10.00); null = free
+ *     paid: true,                                 // fee and methods: src/lib/payment-options.ts
  *     capacity: 100,                              // optional
  *     registrationDeadline: "2026-11-21T12:00:00+00:00", // optional
  *     registration: "open",                       // "open" | "closed" | "not-yet-open"
@@ -24,7 +24,7 @@
  */
 
 export type Price = {
-  /** Amount in the currency's minor unit (pence, cents, paisa). */
+  /** Amount in the minor unit used by Intl.NumberFormat (cents for USD; PKR has none). */
   amount: number;
   /** ISO 4217 code, e.g. "GBP", "USD", "PKR". */
   currency: string;
@@ -39,7 +39,8 @@ export type Lecture = {
   timeZone: string;
   language: string;
   platform: string;
-  price: Price | null;
+  /** Paid lectures charge the fee for the payment region the visitor chooses. */
+  paid: boolean;
   capacity?: number;
   registrationDeadline?: string;
   registration: "open" | "closed" | "not-yet-open";

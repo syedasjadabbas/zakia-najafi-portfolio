@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site, type Course } from "@/content/site";
 import { ArrowRightIcon, BookTextIcon, QuranIcon } from "./icons";
@@ -13,16 +14,45 @@ function details(course: Course) {
 
 export function Courses() {
   return (
-    <section id="courses" aria-labelledby="courses-title" className="bg-sand py-20 md:py-24">
-      <div className="container-page">
-        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-6">
+    <section id="courses" aria-labelledby="courses-title" className="relative overflow-hidden bg-sand pb-36 pt-36 sm:pb-40 sm:pt-40 lg:pb-44 lg:pt-44">
+      {/*
+        Background calligraphy, set in Amiri (not an image):
+        Qur'an 20:114, and the hadith of the Prophet (s) recorded in al-Kafi and Sunan Ibn Majah.
+      */}
+      {/* Books photograph on the right (AI-generated still life, no people), fading into the sand. */}
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
+        <Image src="/images/courses-books.webp" alt="" fill sizes="46vw" quality={90} className="object-cover object-[70%_100%]" />
+        <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-sand to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-sand to-transparent" />
+      </div>
+
+      <div aria-hidden className="pointer-events-none absolute inset-0 select-none font-arabic text-brass-dark">
+        <p
+          lang="ar"
+          dir="rtl"
+          className="absolute left-[5%] top-8 whitespace-nowrap py-3 text-[3rem] leading-[1.5] opacity-[0.11] sm:top-6 sm:text-[4rem] lg:text-[5.5rem]"
+        >
+          وَقُل رَّبِّ زِدْنِي عِلْمًا
+        </p>
+        <p
+          lang="ar"
+          dir="rtl"
+          className="absolute bottom-6 left-[5%] max-w-[90%] py-3 text-[2rem] leading-[1.5] opacity-[0.1] sm:bottom-4 sm:text-[3rem] lg:max-w-[50%] lg:whitespace-nowrap lg:text-[3.5rem]"
+        >
+          طَلَبُ العِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ
+        </p>
+      </div>
+
+      <div className="container-page relative">
+        <div className="lg:w-[58%]">
+        <div>
+          <div>
             <p className="eyebrow">Courses</p>
             <h2 id="courses-title" className="mt-4 text-[2.375rem] leading-[1.08] tracking-[-0.015em] md:text-[3rem]">
               Hawzah courses and Tafseer classes
             </h2>
           </div>
-          <p className="max-w-[30rem] text-soft lg:col-span-5 lg:col-start-8 lg:pb-2">
+          <p className="mt-5 max-w-[34rem] text-soft">
             Structured study alongside the public lectures. Schedules and enrolment for each intake are published here.
           </p>
         </div>
@@ -70,6 +100,12 @@ export function Courses() {
             );
           })}
         </ul>
+        </div>
+
+        {/* Phones and tablets: the books photograph below the courses. */}
+        <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-[6px] lg:hidden">
+          <Image src="/images/courses-books.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[75%_100%]" />
+        </div>
       </div>
     </section>
   );
