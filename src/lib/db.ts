@@ -80,6 +80,7 @@ create table if not exists lectures (
 
 declare global {
   var __zbnDb: Promise<Db> | undefined;
+  var __zbnSchema: string | undefined;
 }
 
 async function createPostgres(url: string): Promise<Db> {
@@ -122,14 +123,23 @@ async function createEmbedded(): Promise<Db> {
   };
 }
 
-export function getDb(): Promise<Db> {
-  globalThis.__zbnDb ??= (
-    process.env.DATABASE_URL ? createPostgres(process.env.DATABASE_URL) : createEmbedded()
-  ).catch((error) => {
-    globalThis.__zbnDb = undefined; // allow a retry on the next request
-    throw error;
-  });
-  return globalThis.__zbnDb;
+export async function getDb(): Promise<Db> {
+  if (!globalThis.__zbnDb) {
+    globalThis.__zbnSchema = SCHEMA;
+    globalThis.__zbnDb = (
+      process.env.DATABASE_URL ? createPostgres(process.env.DATABASE_URL) : createEmbedded()
+    ).catch((error) => {
+      globalThis.__zbnDb = undefined; // allow a retry on the next request
+      throw error;
+    });
+  }
+  const db = await globalThis.__zbnDb;
+  // A connection kept across code reloads (dev server) may predate a schema change: apply it.
+  if (globalThis.__zbnSchema !== SCHEMA) {
+    for (const statement of SCHEMA.split(";").filter((s) => s.trim())) await db.query(statement);
+    globalThis.__zbnSchema = SCHEMA;
+  }
+  return db;
 }
 
 /** True when a Postgres unique constraint was violated. */
