@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType } from "react";
 import { site } from "@/content/site";
-import { ArrowRightIcon, BookOpenIcon, BookTextIcon, PeopleIcon, PlayIcon, QuranIcon } from "./icons";
+import { HeroCta } from "./hero-cta";
+import { BookOpenIcon, BookTextIcon, PeopleIcon, PlayIcon, QuranIcon } from "./icons";
 
 const teaching: { label: string; note: string; href: string; Icon: ComponentType<{ size?: number }> }[] = [
   { label: "Islamic lectures & majalis", note: "Live online and recorded", href: "#lectures", Icon: BookOpenIcon },
@@ -93,21 +94,12 @@ export function Introduction() {
               {site.introduction}
             </p>
 
-            {/* Editorial text actions: typography carries the emphasis, not boxes. */}
-            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 xl:gap-x-7">
-              <Link
-                href="#lectures"
-                className="group inline-flex min-h-11 items-center gap-3 font-serif text-[1.25rem] text-forest md:text-[1.3125rem] lg:text-[1.1875rem] xl:text-[1.25rem]"
-              >
-                <span className="underline decoration-forest/50 decoration-1 underline-offset-[0.4em] transition-[text-decoration-color] duration-200 group-hover:decoration-forest">
-                  Explore live lectures
-                </span>
-                <ArrowRightIcon size={18} className="arrow" />
-              </Link>
-              <span aria-hidden className="hidden h-9 w-px bg-line sm:block lg:hidden xl:block" />
+            {/* The one filled button on the page: registering for a live lecture. */}
+            <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <HeroCta />
               <Link
                 href="#recordings"
-                className="group inline-flex min-h-11 items-center gap-3 font-serif text-[1.25rem] text-soft transition-colors duration-200 hover:text-ink md:text-[1.3125rem] lg:text-[1.1875rem] xl:text-[1.25rem]"
+                className="group inline-flex min-h-[3.25rem] items-center gap-3 font-serif text-[1.25rem] text-soft transition-colors duration-200 hover:text-ink md:text-[1.3125rem] lg:text-[1.1875rem] xl:text-[1.25rem]"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brass/70 text-brass-dark transition-colors duration-200 group-hover:border-forest group-hover:text-forest">
                   <PlayIcon size={9} className="ml-0.5" />
