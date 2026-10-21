@@ -14,7 +14,16 @@ import {
   type Registration,
   type RegistrationStatus,
 } from "@/lib/registrations";
-import { approveRegistration, logout, rejectRegistration, saveAccessInstructions } from "./actions";
+import { isoToZonedParts, listStoredLectures } from "@/lib/lecture-store";
+import {
+  approveRegistration,
+  deleteLecture,
+  logout,
+  rejectRegistration,
+  saveAccessInstructions,
+  setLectureRegistration,
+} from "./actions";
+import { LectureForm, type LectureFormValues } from "./lecture-form";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
@@ -23,7 +32,7 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
 };
 
-export default function AdminPage() {
+export default function AdminPage({ searchParams }: PageProps<"/admin">) {
   return (
     <main id="main" className="container-page pb-24 pt-10">
       <p className="text-[0.9375rem]">
@@ -32,13 +41,13 @@ export default function AdminPage() {
         </Link>
       </p>
       <Suspense fallback={<p className="mt-10 text-soft">Loading…</p>}>
-        <AdminContent />
+        <AdminContent searchParams={searchParams} />
       </Suspense>
     </main>
   );
 }
 
-async function AdminContent() {
+async function AdminContent({ searchParams }: { searchParams: PageProps<"/admin">["searchParams"] }) {
   await connection(); // configuration is read from the environment at request time
   if (!isAdminConfigured()) {
     return (
@@ -61,7 +70,8 @@ async function AdminContent() {
     );
   }
 
-  return <Dashboard />;
+  const edit = (await searchParams).edit;
+  return <Dashboard editSlug={typeof edit === "string" ? edit : null} />;
 }
 
 const statusText: Record<RegistrationStatus, string> = {
@@ -72,12 +82,50 @@ const statusText: Record<RegistrationStatus, string> = {
   cancelled: "Cancelled",
 };
 
-async function Dashboard() {
-  const [lectures, registrations, access] = await Promise.all([
+/** Today's date in Pakistan, for the form's default. */
+function todayInKarachi() {
+  return isoToZonedParts(new Date().toISOString(), "Asia/Karachi").date;
+}
+
+async function Dashboard({ editSlug }: { editSlug: string | null }) {
+  const [lectures, registrations, access, stored] = await Promise.all([
     getLectures(),
     listRegistrations(),
     getAllAccessInstructions(),
+    listStoredLectures(),
   ]);
+  const storedSlugs = new Set(stored.map((l) => l.slug));
+  const editing = editSlug ? stored.find((l) => l.slug === editSlug) : undefined;
+  const formValues: LectureFormValues = editing
+    ? {
+        slug: editing.slug,
+        title: editing.title,
+        description: editing.description,
+        ...isoToZonedParts(editing.startsAt, editing.timeZone),
+        timeZone: editing.timeZone,
+        duration: editing.durationMinutes,
+        language: editing.language,
+        platform: editing.platform,
+        paid: editing.paid,
+        capacity: editing.capacity ? String(editing.capacity) : "",
+        registration: editing.registration,
+        instructions: access.get(editing.slug) ?? "",
+      }
+    : {
+        slug: "",
+        title: "",
+        description: "",
+        date: todayInKarachi(),
+        time: "22:00",
+        timeZone: "Asia/Karachi",
+        duration: 60,
+        language: "Urdu",
+        platform: "Zoom",
+        paid: true,
+        capacity: "",
+        registration: "open",
+        instructions: "",
+      };
   const toVerify = registrations.filter((r) => r.status === "pending_verification");
   const titles = new Map(lectures.map((l) => [l.slug, l.title]));
 
@@ -101,6 +149,18 @@ async function Dashboard() {
         {isEmailConfigured() ? "sending" : "not configured (registrants rely on their private link)"}
       </p>
 
+      <section id="lectures-admin" aria-labelledby="publish-title" className="scroll-mt-24">
+        <h2 id="publish-title" className="font-serif text-[1.625rem]">
+          {editing ? `Edit: ${editing.title}` : "Publish a lecture"}
+        </h2>
+        <p className="mt-2 max-w-[42rem] text-[0.9375rem] text-soft">
+          {editing
+            ? "Changes appear on the website as soon as you save. The lecture keeps its address, so links you have shared still work."
+            : "Fill this in and press Publish: the lecture appears on the website straight away, and the hero button points to it."}
+        </p>
+        <LectureForm key={editing?.slug ?? "new"} initial={formValues} />
+      </section>
+
       <section aria-labelledby="verify-title">
         <h2 id="verify-title" className="font-serif text-[1.625rem]">
           Payments to verify <span className="text-soft">({toVerify.length})</span>
@@ -117,8 +177,8 @@ async function Dashboard() {
           Lectures and joining instructions
         </h2>
         <p className="mt-2 max-w-[42rem] text-[0.9375rem] text-soft">
-          Lectures are edited in <code>src/content/lectures.ts</code>. Joining instructions are private: they are
-          shown only to confirmed registrants on their own registration page. Where the platform allows it (for
+          Joining instructions are private: they are shown only to confirmed registrants on their own
+          registration page. Where the platform allows it (for
           example Zoom registration or waiting rooms), enable participant controls as well — a shared link cannot
           be fully prevented.
         </p>
@@ -137,8 +197,42 @@ async function Dashboard() {
                     </p>
                     <p className="mt-1 text-[0.875rem] text-soft">
                       {confirmed} confirmed{lecture.capacity ? ` of ${lecture.capacity}` : ""} · {forLecture.length}{" "}
-                      total
+                      total · Registration{" "}
+                      {{ open: "open", closed: "closed", "not-yet-open": "opens later" }[lecture.registration]}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[0.9375rem]">
+                      <Link href={`/lectures/${lecture.slug}`} className="link text-soft" target="_blank">
+                        View
+                      </Link>
+                      {storedSlugs.has(lecture.slug) ? (
+                        <>
+                          <Link href={`/admin?edit=${encodeURIComponent(lecture.slug)}#lectures-admin`} className="link text-forest">
+                            Edit
+                          </Link>
+                          <form action={setLectureRegistration}>
+                            <input type="hidden" name="slug" value={lecture.slug} />
+                            <input
+                              type="hidden"
+                              name="registration"
+                              value={lecture.registration === "open" ? "closed" : "open"}
+                            />
+                            <button type="submit" className="link text-forest">
+                              {lecture.registration === "open" ? "Close registration" : "Open registration"}
+                            </button>
+                          </form>
+                          {forLecture.length === 0 ? (
+                            <form action={deleteLecture}>
+                              <input type="hidden" name="slug" value={lecture.slug} />
+                              <button type="submit" className="link text-alert">
+                                Delete
+                              </button>
+                            </form>
+                          ) : null}
+                        </>
+                      ) : (
+                        <span className="text-soft">Defined in code</span>
+                      )}
+                    </div>
                   </div>
                   <form action={saveAccessInstructions} className="md:col-span-8">
                     <input type="hidden" name="slug" value={lecture.slug} />
@@ -162,7 +256,7 @@ async function Dashboard() {
             })}
           </ul>
         ) : (
-          <p className="mt-4 text-soft">No lectures are configured.</p>
+          <p className="mt-4 text-soft">No lectures yet. Publish one above.</p>
         )}
       </section>
 

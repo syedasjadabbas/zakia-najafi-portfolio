@@ -1,10 +1,20 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { getLecture } from "@/content/lectures";
+import { z } from "zod";
+import { getLecture, getLectures } from "@/content/lectures";
 import { site } from "@/content/site";
 import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/admin-auth";
 import { sendEmail } from "@/lib/email";
+import { lectureTimeZones } from "@/lib/lecture-time-zones";
+import {
+  deleteStoredLecture,
+  getStoredLecture,
+  saveStoredLecture,
+  setStoredLectureRegistration,
+  uniqueSlug,
+  zonedTimeToIso,
+} from "@/lib/lecture-store";
 import { getRegistration, setAccessInstructions, transitionRegistration } from "@/lib/registrations";
 
 export type LoginState = { error?: string };
@@ -81,4 +91,104 @@ async function notify(id: string, outcome: "confirmed" | "rejected") {
       site.name,
     ].join("\n"),
   });
+}
+
+/* ---------- Lectures published from the admin panel ---------- */
+
+export type LectureFormState = {
+  ok?: boolean;
+  message?: string;
+  slug?: string;
+  errors?: Partial<Record<"title" | "description" | "date" | "time" | "duration" | "capacity" | "timeZone" | "language" | "platform", string>>;
+};
+
+const lectureSchema = z.object({
+  slug: z.string().trim().max(120),
+  title: z.string().trim().min(3, "Please enter a title.").max(140, "Please shorten the title."),
+  description: z.string().trim().max(600, "Please keep the description under 600 characters."),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Please choose a date."),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Please choose a start time."),
+  timeZone: z.enum(lectureTimeZones.map((zone) => zone.id) as [string, ...string[]], { message: "Please choose a time zone." }),
+  duration: z.coerce.number().int().min(5, "Please choose a duration.").max(600),
+  language: z.string().trim().min(1).max(40),
+  platform: z.string().trim().min(1).max(40),
+  paid: z.enum(["paid", "free"]),
+  capacity: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || (/^\d+$/.test(v) && Number(v) > 0), "Use a whole number, or leave it empty."),
+  registration: z.enum(["open", "not-yet-open", "closed"]),
+  instructions: z.string().max(4000),
+});
+
+export async function saveLecture(_prev: LectureFormState, formData: FormData): Promise<LectureFormState> {
+  await requireAdmin();
+  const raw = Object.fromEntries(
+    ["slug", "title", "description", "date", "time", "timeZone", "duration", "language", "platform", "paid", "capacity", "registration", "instructions"].map(
+      (key) => [key, String(formData.get(key) ?? "")],
+    ),
+  );
+  const parsed = lectureSchema.safeParse(raw);
+  if (!parsed.success) {
+    const errors: NonNullable<LectureFormState["errors"]> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof typeof errors;
+      errors[key] ??= issue.message;
+    }
+    return { errors, message: "Please check the highlighted fields." };
+  }
+  const data = parsed.data;
+  const startsAt = zonedTimeToIso(data.date, data.time, data.timeZone);
+  if (!startsAt) return { errors: { date: "Please check the date and time." } };
+
+  // Editing keeps the original address, so links already shared keep working.
+  let slug = data.slug;
+  if (slug) {
+    if (!(await getStoredLecture(slug))) return { message: "This lecture could not be found." };
+  } else {
+    const taken = (await getLectures()).map((l) => l.slug);
+    slug = uniqueSlug(data.title, startsAt, taken);
+  }
+
+  await saveStoredLecture({
+    slug,
+    title: data.title,
+    description: data.description,
+    startsAt,
+    durationMinutes: data.duration,
+    timeZone: data.timeZone,
+    language: data.language,
+    platform: data.platform,
+    paid: data.paid === "paid",
+    capacity: data.capacity ? Number(data.capacity) : undefined,
+    registration: data.registration,
+  });
+  if (data.instructions.trim() || data.slug) await setAccessInstructions(slug, data.instructions);
+
+  refresh();
+  return {
+    ok: true,
+    slug,
+    message: data.slug ? "Saved. The website is updated." : "Published. The lecture is now live on the website.",
+  };
+}
+
+export async function setLectureRegistration(formData: FormData) {
+  await requireAdmin();
+  const slug = String(formData.get("slug"));
+  const registration = String(formData.get("registration"));
+  if (!["open", "closed", "not-yet-open"].includes(registration)) throw new Error("Invalid status");
+  if (!(await getStoredLecture(slug))) throw new Error("Unknown lecture");
+  await setStoredLectureRegistration(slug, registration as "open" | "closed" | "not-yet-open");
+  refresh();
+}
+
+export async function deleteLecture(formData: FormData) {
+  await requireAdmin();
+  const slug = String(formData.get("slug"));
+  if (!(await getStoredLecture(slug))) throw new Error("Unknown lecture");
+  if (!(await deleteStoredLecture(slug))) {
+    throw new Error("People have registered for this lecture, so it can't be deleted. Close registration instead.");
+  }
+  refresh();
 }

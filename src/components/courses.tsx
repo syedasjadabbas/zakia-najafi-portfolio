@@ -19,9 +19,9 @@ export function Courses() {
         Background calligraphy, set in Amiri (not an image):
         Qur'an 20:114, and the hadith of the Prophet (s) recorded in al-Kafi and Sunan Ibn Majah.
       */}
-      {/* Books photograph on the right (AI-generated still life, no people), fading into the sand. */}
+      {/* Scholar's bookshelf on the right (AI-generated, no people or text), fading into the sand. */}
       <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
-        <Image src="/images/courses-books.webp" alt="" fill sizes="46vw" quality={90} className="object-cover object-[70%_100%]" />
+        <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="46vw" quality={90} className="object-cover object-[60%_50%]" />
         <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-sand to-transparent" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-sand to-transparent" />
       </div>
@@ -104,7 +104,7 @@ export function Courses() {
 
         {/* Phones and tablets: the books photograph below the courses. */}
         <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-[6px] lg:hidden">
-          <Image src="/images/courses-books.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[75%_100%]" />
+          <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[60%_45%]" />
         </div>
       </div>
     </section>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -13,6 +14,7 @@ import { getLiveMethodIds } from "@/lib/payment-gateways";
 import { RegistrationForm } from "./registration-form";
 
 export async function generateMetadata({ params }: PageProps<"/lectures/[slug]">): Promise<Metadata> {
+  await connection(); // lectures come from the database, so read them at request time
   const lecture = await getLecture((await params).slug);
   if (!lecture) return { title: "Lecture not found" };
   return {

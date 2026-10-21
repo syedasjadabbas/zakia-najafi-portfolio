@@ -22,9 +22,7 @@ export function Contact() {
               Write by email
               <ArrowRightIcon className="arrow" />
             </a>
-          ) : (
-            <p className="mt-6 text-[0.9375rem] text-soft">Email is the preferred way to get in touch; the address will be added here.</p>
-          )}
+          ) : null}
         </div>
 
         <div className="border-line lg:col-span-7 lg:border-l lg:pl-12">

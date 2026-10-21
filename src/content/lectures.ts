@@ -46,19 +46,33 @@ export type Lecture = {
   registration: "open" | "closed" | "not-yet-open";
 };
 
+/** Lectures defined in code. Most lectures are published from /admin instead. */
 const lectures: Lecture[] = [];
 
+/** Lectures published from the admin panel. Never breaks the page if the database is down. */
+async function storedLectures(): Promise<Lecture[]> {
+  try {
+    const { listStoredLectures } = await import("@/lib/lecture-store");
+    return await listStoredLectures();
+  } catch (error) {
+    console.error("Could not load lectures from the database", error);
+    return [];
+  }
+}
+
 /**
- * Returns the configured lectures. In development only, setting
- * SHOW_EXAMPLE_LECTURES=true loads clearly fictional sample lectures so the
- * registration flow can be tried out. They are never used in production.
+ * Returns all lectures: those published from /admin plus any defined above.
+ * In development only, SHOW_EXAMPLE_LECTURES=true also loads clearly fictional
+ * sample lectures so the registration flow can be tried out. They are never
+ * used in production.
  */
 export async function getLectures(): Promise<Lecture[]> {
+  const all = [...(await storedLectures()), ...lectures];
   if (process.env.NODE_ENV !== "production" && process.env.SHOW_EXAMPLE_LECTURES === "true") {
     const { exampleLectures } = await import("./lectures.example");
-    return [...lectures, ...exampleLectures];
+    all.push(...exampleLectures);
   }
-  return lectures;
+  return all;
 }
 
 export async function getLecture(slug: string): Promise<Lecture | undefined> {

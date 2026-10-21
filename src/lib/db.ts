@@ -58,6 +58,24 @@ create table if not exists processed_payment_events (
   event_id text primary key,
   processed_at timestamptz not null default now()
 );
+
+-- Lectures published from /admin (in addition to any in src/content/lectures.ts).
+create table if not exists lectures (
+  slug text primary key,
+  title text not null,
+  description text not null default '',
+  starts_at timestamptz not null,
+  duration_minutes integer not null check (duration_minutes between 5 and 600),
+  time_zone text not null,
+  language text not null,
+  platform text not null,
+  paid boolean not null,
+  capacity integer check (capacity is null or capacity > 0),
+  registration_deadline timestamptz,
+  registration text not null check (registration in ('open', 'closed', 'not-yet-open')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 `;
 
 declare global {

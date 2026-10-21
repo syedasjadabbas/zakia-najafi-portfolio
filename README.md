@@ -28,10 +28,16 @@ The scripts call `node node_modules/...` directly because the project folder nam
 All public content is in `src/content/`. Edit these files; the page hides anything left empty.
 
 - `site.ts`: name, qualification, introduction, biography, portrait, email, social links, courses, consultation.
-- `lectures.ts`: live lectures (format documented at the top of the file). Prices are in minor units (`1000` = £10.00).
+- `lectures.ts`: optional lectures defined in code (format documented at the top of the file). Normally lectures are published from `/admin` instead.
 - `videos.ts`: recorded lectures from the YouTube channel. The first entry is featured, using the still in `public/images/`.
 
 Joining links are **not** stored in these files. They are entered at `/admin` and kept in the database.
+
+## Publishing a lecture
+
+Sign in at `/admin` (works on a phone) and fill in **Publish a lecture**: title, date, start time and time zone (Pakistan time by default), duration, language, platform, paid or free, places, and the private joining link. It is live on the site as soon as it is published, with no code change or redeploy, and the hero button points to the next open lecture.
+
+From the same page each lecture can be edited, have registration closed or reopened, or be deleted (only while nobody has registered). The joining link is shown only to confirmed registrants: free lectures at once, paid lectures once the payment is verified.
 
 ## Registration and payment
 
@@ -80,7 +86,7 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 | Biography | `site.biography` | About shows a short factual summary |
 | Permission for the hero photo | `public/images/portrait-muharram-1448.jpg` | The portrait from her Muharram 1448 YouTube thumbnails (poster for Al-Abbas Islamic Centre, 17 June 2026), 424×530. Confirm use, and ideally supply the original photograph at full resolution. |
 | JazzCash / Easypaisa merchant accounts and an international card gateway (or Stripe) | `src/lib/payment-gateways.ts` + env vars | Paid lectures show the payment options, with "Proceed to payment" disabled and "Secure online payments will be available soon." |
-| Lectures (title, date/time, time zone, language, platform, fee, capacity, deadline) | `src/content/lectures.ts` | "New lecture details will be announced here." |
+| Lectures (title, date/time, time zone, language, platform, paid or free, capacity, joining link) | Published from `/admin` | "New lecture details will be announced here." |
 | Hawzah course / Tafseer class details | `site.courses` | One line saying schedules will be published |
 | Consultation scope and how to request | `site.consultation.details` | One factual sentence |
 | Hero tagline (optional, e.g. the motto in the approved mock-up) | `site.heroTagline` | Not shown; no wording has been approved |
@@ -98,6 +104,6 @@ No publications, testimonials or statistics are shown, and none were invented. A
 - Hero: the background `public/images/hero-arch-background.webp` was supplied by the client (an empty arch scene, no person). Her portrait `public/images/portrait-muharram-1448-cutout.png` is her real thumbnail photo with the poster background removed by `scripts/make-portrait-cutout.py` (OpenCV GrabCut, which only traces the outline and does not generate pixels). Both are positioned from the arch centre at 72.9% of the background width.
 - About photo: `public/images/majlis-safar-1444-mwa.jpg` is an unedited frame from her YouTube recording of the 3rd Majlis, Safar 1444 (MWA, youtube.com/watch?v=vTXe_Vp_10U), cropped above the video's name strip.
 - Registration page photo: `public/images/majlis-3-muharram-1448.jpg` is an unedited frame from her recording of the 3rd Majlis, Muharram 1448 (KSIMC Birmingham, youtube.com/watch?v=NEbP26zAs6s), cropped clear of the video's name banner.
-- Courses image: `public/images/courses-books.webp` is AI-generated (Figma AI, Gemini image model) at the site owner's request: a still life of bound books, with no people and no text. Replace it with a real photograph if preferred.
+- Courses image: `public/images/courses-bookshelf.webp` is AI-generated (Figma AI, GPT image model) at the site owner's request: a scholar's study bookshelf with ornament-only gold spines, a rehal, misbaha and turbah, with no people and no lettering. Replace it with a real photograph if preferred.
 - Fonts (Newsreader, IBM Plex Sans, Amiri; OFL-1.1) are self-hosted from `src/app/_fonts/` via `next/font/local`. The Google Fonts loader fails to build in a folder whose path contains `&`, and self-hosting also keeps visitors off Google.
 - Brand icons in the contact section and footer come from Simple Icons v16.35.0 (CC0), stored in `src/components/brand-paths.ts`.
