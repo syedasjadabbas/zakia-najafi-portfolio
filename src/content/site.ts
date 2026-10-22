@@ -26,8 +26,16 @@ export const site = {
   name: "Zakia Batool Najafi",
   qualification: "Master's in Islamic Sciences",
 
-  /** Used for canonical URLs, sitemap and Open Graph. Set NEXT_PUBLIC_SITE_URL in production. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  /**
+   * Used for canonical URLs, sitemap and Open Graph. NEXT_PUBLIC_SITE_URL wins (set it
+   * when a custom domain is added); on Vercel it otherwise falls back to the project's
+   * production address, which Vercel provides automatically.
+   */
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000"),
 
   description:
     "Zakia Batool Najafi — Master's in Islamic Sciences. Islamic lectures and majalis, Hawzah courses, Tafseer classes and consultation.",

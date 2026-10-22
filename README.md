@@ -74,7 +74,8 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 
 ## Deployment
 
-- Set `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `ADMIN_PASSWORD` and `SESSION_SECRET`. Tables are created automatically on first connection.
+- Set `DATABASE_URL`, `ADMIN_PASSWORD` and `SESSION_SECRET`. Tables are created automatically on first connection.
+- Canonical URLs, the sitemap and link previews use the Vercel production address automatically. After adding a custom domain, set `NEXT_PUBLIC_SITE_URL` to it (e.g. `https://www.example.com`) and redeploy.
 - A real PostgreSQL database is required in production. The embedded fallback writes to local disk, which is not persistent on serverless hosts.
 - The admin sign-in is a single shared password with an 8-hour signed cookie. Failed attempts are rate-limited in memory, per server instance.
 - `ADMIN_PASSWORD` is only the first password. The administrator can change it under **Change password** at the bottom of `/admin`; the new one is stored in the database as a salted scrypt hash and replaces `ADMIN_PASSWORD`. Changing it signs out every other device.
@@ -92,14 +93,13 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 | Hawzah course / Tafseer class details | `site.courses` | One line saying schedules will be published |
 | Consultation scope and how to request | `site.consultation.details` | One factual sentence |
 | Hero tagline (optional, e.g. the motto in the approved mock-up) | `site.heroTagline` | Not shown; no wording has been approved |
-| Domain | `NEXT_PUBLIC_SITE_URL` | Canonical URLs and sitemap point at localhost |
+| Domain | `NEXT_PUBLIC_SITE_URL` | Canonical URLs and sitemap use the `vercel.app` address |
 | Privacy notice review | `src/app/privacy/page.tsx` | Plain description of what the site actually collects; not legal advice |
 
 No publications, testimonials or statistics are shown, and none were invented. Add a publications section only when real material exists.
 
 ## Known limitations
 
-- A lecture URL that doesn't exist streams a "Page not found" page with `noindex`, but returns HTTP 200: with partial prerendering the static shell is sent before the lookup runs.
 - Revoking a confirmed Stripe registration in the admin does not issue a refund. Refund in the Stripe dashboard.
 - The Terms page (`/terms`) covers only how registration works. Fees, cancellation and refund terms must be supplied and reviewed before paid lectures go live.
 - Logo: the supplied ZB monogram is kept unchanged at `public/brand/zb-logo-original.webp`. `python scripts/make-logo-assets.py <original> <out-dir>` regenerates the transparent navbar and footer versions (`public/brand/zb-mark-on-*.png`) and the favicons (`src/app/icon.png`, `src/app/apple-icon.png`). Re-run it if the client sends a vector (SVG) version, which would be sharper still.
