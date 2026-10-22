@@ -30,7 +30,7 @@ export default function LecturePage({ params }: PageProps<"/lectures/[slug]">) {
       <SiteHeader />
       <main id="main" className="container-page pb-24 pt-10 md:pb-32 md:pt-14">
         <p className="text-[0.9375rem]">
-          <Link href="/#lectures" className="link text-forest">
+          <Link href="/#lectures" className="link tap text-forest">
             ← All live lectures
           </Link>
         </p>

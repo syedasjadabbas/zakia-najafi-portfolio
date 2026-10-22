@@ -24,7 +24,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-ivory text-ink">
       <div className="container-page flex h-[4.5rem] items-center justify-between gap-6 lg:h-[4.75rem]">
         <HomeLink
-          className="group flex items-center gap-3 whitespace-nowrap font-serif text-[1.1875rem] leading-none tracking-[-0.01em] text-ink transition-colors hover:text-forest min-[400px]:text-[1.3125rem] sm:gap-5 sm:text-[1.5rem]"
+          className="tap group flex items-center gap-3 whitespace-nowrap font-serif text-[1.1875rem] leading-none tracking-[-0.01em] text-ink transition-colors hover:text-forest min-[400px]:text-[1.3125rem] sm:gap-5 sm:text-[1.5rem]"
         >
           <Image
             src={site.logo.onLight.src}

@@ -10,7 +10,7 @@ export default function NotFound() {
         <h1 className="font-serif text-[2.25rem]">Page not found</h1>
         <p className="font-serif text-[1.25rem] leading-relaxed mt-4">The page you were looking for is not here.</p>
         <p className="mt-8">
-          <Link href="/" className="link">
+          <Link href="/" className="link tap">
             Return to the home page
           </Link>
         </p>

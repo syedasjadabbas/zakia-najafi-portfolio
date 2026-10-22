@@ -48,7 +48,7 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
       {primary ? (
         <Link
           href={primary.href}
-          className="hidden whitespace-nowrap text-[0.9375rem] font-medium text-forest min-[420px]:inline"
+          className="tap hidden whitespace-nowrap text-[0.9375rem] font-medium text-forest min-[420px]:inline"
         >
           {primary.label}
         </Link>
@@ -69,7 +69,8 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
         ref={panelRef}
         id={id}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-line bg-ivory"
+        // Below the sticky header; on short landscape screens the panel scrolls so every item stays reachable.
+        className="absolute inset-x-0 top-full max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-b border-line bg-ivory"
       >
         <nav aria-label="Main" className="container-page pb-8 pt-3">
           <ul>

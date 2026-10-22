@@ -89,7 +89,7 @@ export function Courses() {
                 <div className="border-t border-line pt-5">
                   <Link
                     href={action.href}
-                    className="group inline-flex items-center gap-2 text-[0.9688rem] font-medium text-forest"
+                    className="tap group inline-flex items-center gap-2 text-[0.9688rem] font-medium text-forest"
                   >
                     {action.label}
                     <span className="sr-only"> — {course.title}</span>

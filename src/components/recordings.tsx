@@ -49,7 +49,7 @@ export function Recordings() {
               href={`https://www.youtube.com/watch?v=${featured.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group mt-6 inline-flex items-center gap-2 text-[0.9688rem] font-medium text-forest"
+              className="tap group mt-6 inline-flex items-center gap-2 text-[0.9688rem] font-medium text-forest"
             >
               <span className="link">Watch on YouTube</span>
               <ArrowRightIcon className="arrow" />

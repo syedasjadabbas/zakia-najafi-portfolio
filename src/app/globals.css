@@ -132,6 +132,7 @@
     text-decoration-color: currentColor;
   }
 
+
   .button {
     display: inline-flex;
     align-items: center;
@@ -229,5 +230,23 @@
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Enlarges the touch area of a small link or button to 44px without changing
+ * how it looks. Where items sit closer together, cap it with --tap-y so
+ * neighbours' areas don't overlap. A utility, so it also works with variants.
+ */
+@utility tap {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, var(--tap-x, 44px));
+    height: max(100%, var(--tap-y, 44px));
+    transform: translate(-50%, -50%);
   }
 }

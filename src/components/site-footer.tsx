@@ -28,7 +28,7 @@ export function SiteFooter() {
           <ul className="flex flex-wrap gap-x-7 gap-y-2 text-[0.9375rem]">
             {navigation.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-ivory/80 transition-colors hover:text-brass-light">
+                <Link href={item.href} className="tap text-ivory/80 transition-colors hover:text-brass-light [--tap-y:34px]">
                   {item.label}
                 </Link>
               </li>
@@ -44,7 +44,7 @@ export function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${link.label} (opens in a new tab)`}
-                className="inline-flex rounded-full border border-ivory/25 text-ivory/85 transition-colors hover:border-brass-light hover:text-brass-light"
+                className="tap inline-flex rounded-full border border-ivory/25 text-ivory/85 transition-colors hover:border-brass-light hover:text-brass-light"
               >
                 <BrandIcon name={link.label} size={38} tone="mono" />
               </a>
@@ -58,10 +58,10 @@ export function SiteFooter() {
             © <CurrentYear /> {site.name}
           </p>
           <p className="flex gap-6">
-            <Link href="/privacy" className="transition-colors hover:text-ivory">
+            <Link href="/privacy" className="tap transition-colors hover:text-ivory">
               Privacy
             </Link>
-            <Link href="/terms" className="transition-colors hover:text-ivory">
+            <Link href="/terms" className="tap transition-colors hover:text-ivory">
               Terms
             </Link>
           </p>
