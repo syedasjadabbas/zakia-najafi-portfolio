@@ -4,7 +4,14 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import { getLecture, getLectures } from "@/content/lectures";
 import { site } from "@/content/site";
-import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/admin-auth";
+import {
+  checkPassword,
+  endAdminSession,
+  MIN_PASSWORD_LENGTH,
+  requireAdmin,
+  setAdminPassword,
+  startAdminSession,
+} from "@/lib/admin-auth";
 import { sendEmail } from "@/lib/email";
 import { lectureTimeZones } from "@/lib/lecture-time-zones";
 import {
@@ -29,7 +36,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return { error: "Too many attempts. Please wait a few minutes and try again." };
   }
 
-  if (!checkPassword(String(formData.get("password") ?? ""))) {
+  if (!(await checkPassword(String(formData.get("password") ?? "")))) {
     const count = (record?.count ?? 0) + 1;
     failedAttempts.set(key, { count, until: count >= 5 ? now + 5 * 60_000 : 0 });
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -40,6 +47,44 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   await startAdminSession();
   refresh();
   return {};
+}
+
+export type PasswordState = {
+  ok?: boolean;
+  message?: string;
+  errors?: Partial<Record<"current" | "next" | "confirm", string>>;
+};
+
+export async function changePassword(_prev: PasswordState, formData: FormData): Promise<PasswordState> {
+  await requireAdmin();
+  const current = String(formData.get("current") ?? "");
+  const next = String(formData.get("next") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  const key = "admin";
+  const now = Date.now();
+  const record = failedAttempts.get(key);
+  if (record && record.until > now) {
+    return { message: "Too many attempts. Please wait a few minutes and try again." };
+  }
+  if (!(await checkPassword(current))) {
+    const count = (record?.count ?? 0) + 1;
+    failedAttempts.set(key, { count, until: count >= 5 ? now + 5 * 60_000 : 0 });
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    return { errors: { current: "That is not the current password." } };
+  }
+
+  if (next.length < MIN_PASSWORD_LENGTH) {
+    return { errors: { next: `Use at least ${MIN_PASSWORD_LENGTH} characters.` } };
+  }
+  if (next.length > 200) return { errors: { next: "Please use a shorter password." } };
+  if (next === current) return { errors: { next: "Choose a password different from the current one." } };
+  if (next !== confirm) return { errors: { confirm: "The two new passwords do not match." } };
+
+  failedAttempts.delete(key);
+  await setAdminPassword(next);
+  await startAdminSession(); // keep this device signed in; every other device is signed out
+  return { ok: true, message: "Password changed. Use the new password next time you sign in." };
 }
 
 export async function logout() {

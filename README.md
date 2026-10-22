@@ -77,6 +77,8 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 - Set `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `ADMIN_PASSWORD` and `SESSION_SECRET`. Tables are created automatically on first connection.
 - A real PostgreSQL database is required in production. The embedded fallback writes to local disk, which is not persistent on serverless hosts.
 - The admin sign-in is a single shared password with an 8-hour signed cookie. Failed attempts are rate-limited in memory, per server instance.
+- `ADMIN_PASSWORD` is only the first password. The administrator can change it under **Change password** at the bottom of `/admin`; the new one is stored in the database as a salted scrypt hash and replaces `ADMIN_PASSWORD`. Changing it signs out every other device.
+- Forgotten password: run `delete from admin_settings where key = 'password_hash';` on the database. Sign-in then falls back to `ADMIN_PASSWORD`.
 
 ## Still needed from the client
 

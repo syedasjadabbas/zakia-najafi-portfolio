@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getLectures, type Lecture } from "@/content/lectures";
-import { isAdmin, isAdminConfigured } from "@/lib/admin-auth";
+import { isAdmin, isAdminConfigured, MIN_PASSWORD_LENGTH } from "@/lib/admin-auth";
 import { isEmailConfigured } from "@/lib/email";
 import { formatPrice, formatTime } from "@/lib/format";
 import { getLiveMethodIds } from "@/lib/payment-gateways";
@@ -24,6 +24,7 @@ import {
 } from "./actions";
 import { LectureForm, type LectureFormValues } from "./lecture-form";
 import { LoginForm } from "./login-form";
+import { PasswordForm } from "./password-form";
 
 export const metadata: Metadata = {
   title: "Administration",
@@ -104,12 +105,15 @@ const hasEnded = (lecture: Lecture) =>
   new Date(lecture.startsAt).getTime() + lecture.durationMinutes * 60_000 < Date.now();
 
 async function Dashboard({ editSlug }: { editSlug: string | null }) {
-  const [lectures, registrations, access, stored] = await Promise.all([
+  const [lectures, allRegistrations, access, stored] = await Promise.all([
     getLectures(),
     listRegistrations(),
     getAllAccessInstructions(),
     listStoredLectures(),
   ]);
+  // Only registrations for lectures that still exist (e.g. not for local sample lectures once they are switched off).
+  const lectureSlugs = new Set(lectures.map((l) => l.slug));
+  const registrations = allRegistrations.filter((r) => lectureSlugs.has(r.lecture_slug));
   const storedSlugs = new Set(stored.map((l) => l.slug));
   const editing = editSlug ? stored.find((l) => l.slug === editSlug) : undefined;
   const formValues: LectureFormValues = editing
@@ -173,6 +177,9 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
           <Link href="/" className="link tap text-soft" target="_blank">
             Website
           </Link>
+          <a href="#password" className="link tap text-soft">
+            Password
+          </a>
           <form action={logout}>
             <button type="submit" className="link tap text-soft">
               Sign out
@@ -247,6 +254,16 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
           ) : null}
         </div>
       </div>
+
+      <section id="password" aria-labelledby="password-title" className="mt-16 scroll-mt-6 border-t border-line pt-8">
+        <h2 id="password-title" className="font-serif text-[1.375rem]">
+          Change password
+        </h2>
+        <p className="mt-1 text-[0.875rem] text-soft">
+          You stay signed in here; any other phone or computer signed in to this page is signed out.
+        </p>
+        <PasswordForm minLength={MIN_PASSWORD_LENGTH} />
+      </section>
     </>
   );
 }

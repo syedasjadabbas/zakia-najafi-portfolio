@@ -1,10 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Lecture } from "@/content/lectures";
 import { formatDate, formatDuration, formatTime, timeZoneLabel } from "@/lib/format";
 import { getLecturesWithStatus } from "@/lib/lecture-data";
 import type { LectureStatus } from "@/lib/lecture-status";
-import { ArrowRightIcon, BookOpenIcon, ClockIcon, GlobeIcon, HourglassIcon, ScreenIcon } from "./icons";
+import { ArrowRightIcon, ClockIcon, GlobeIcon, HourglassIcon, ScreenIcon } from "./icons";
 
 export function LiveLectures() {
   return (
@@ -27,7 +28,7 @@ export function LiveLectures() {
             fallback={
               // Reserves the height of the finished content so the page doesn't jump
               // (and links to sections further down land in the right place).
-              <div className="panel flex min-h-[348px] items-center p-8 text-soft md:min-h-[283px] md:p-10 lg:min-h-[195px]">
+              <div className="panel flex min-h-[487px] items-center p-8 text-soft md:min-h-[315px] md:p-10 xl:min-h-[274px]">
                 Loading lectures…
               </div>
             }
@@ -181,9 +182,17 @@ async function LectureList() {
 
   if (!current.length) {
     return (
-      <div className="panel flex flex-col gap-8 p-8 text-ink md:flex-row md:items-center md:justify-between md:p-10">
-        <div className="flex gap-5">
-          <BookOpenIcon size={40} className="shrink-0 text-brass-dark" />
+      <div className="panel grid overflow-hidden text-ink md:grid-cols-12">
+        <div className="relative aspect-[16/10] md:col-span-5 md:aspect-auto md:min-h-[17rem]">
+          <Image
+            src="/images/live-lectures-desk.webp"
+            alt=""
+            fill
+            sizes="(min-width: 768px) 42vw, 100vw"
+            className="object-cover object-[40%_55%]"
+          />
+        </div>
+        <div className="flex flex-col items-start justify-center gap-7 p-8 md:col-span-7 md:p-10 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <p className="font-serif text-[1.625rem] leading-snug text-balance md:text-[2rem]">
               New lecture details will be announced here.
@@ -192,11 +201,11 @@ async function LectureList() {
               In the meantime, recent majalis are available to watch in full.
             </p>
           </div>
+          <Link href="#recordings" className="button shrink-0">
+            Watch recorded lectures
+            <ArrowRightIcon className="arrow" />
+          </Link>
         </div>
-        <Link href="#recordings" className="button shrink-0 self-start md:self-center">
-          Watch recorded lectures
-          <ArrowRightIcon className="arrow" />
-        </Link>
       </div>
     );
   }
