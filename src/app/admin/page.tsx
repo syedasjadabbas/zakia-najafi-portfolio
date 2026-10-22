@@ -116,6 +116,7 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
   const registrations = allRegistrations.filter((r) => lectureSlugs.has(r.lecture_slug));
   const storedSlugs = new Set(stored.map((l) => l.slug));
   const editing = editSlug ? stored.find((l) => l.slug === editSlug) : undefined;
+  const paymentsLive = getLiveMethodIds().length > 0;
   const formValues: LectureFormValues = editing
     ? {
         slug: editing.slug,
@@ -141,7 +142,7 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
         duration: 60,
         language: "Urdu",
         platform: "Zoom",
-        paid: true,
+        paid: paymentsLive, // free by default until online payment is connected
         capacity: "",
         registration: "open",
         instructions: "",
@@ -153,7 +154,6 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
   const confirmed = registrations.filter((r) => r.status === "confirmed").length;
   const titles = new Map(lectures.map((l) => [l.slug, l.title]));
   const byLecture = (slug: string) => registrations.filter((r) => r.lecture_slug === slug);
-  const paymentsLive = getLiveMethodIds().length > 0;
 
   const row = (lecture: Lecture) => (
     <LectureRow
@@ -216,7 +216,7 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
             <p className="mb-5 mt-1 text-[0.875rem] text-soft">
               {editing ? editing.title : "Goes live on the website as soon as you publish."}
             </p>
-            <LectureForm key={editing?.slug ?? "new"} initial={formValues} />
+            <LectureForm key={editing?.slug ?? "new"} initial={formValues} paymentsLive={paymentsLive} />
           </div>
         </section>
 

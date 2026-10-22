@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { lectureTimeZones } from "@/lib/lecture-time-zones";
 import { saveLecture, type LectureFormState } from "./actions";
 
@@ -27,8 +27,9 @@ const durationLabel = (minutes: number) =>
 const registrationLabel = { open: "Registration open", "not-yet-open": "Opens later", closed: "Registration closed" };
 
 /** Publish a new lecture, or edit one. The essentials first; the rest folded under "More options". */
-export function LectureForm({ initial }: { initial: LectureFormValues }) {
+export function LectureForm({ initial, paymentsLive }: { initial: LectureFormValues; paymentsLive: boolean }) {
   const editing = Boolean(initial.slug);
+  const [paid, setPaid] = useState(initial.paid);
   const [state, action, pending] = useActionState<LectureFormState, FormData>(saveLecture, {});
   const formRef = useRef<HTMLFormElement>(null);
   const errors = state.errors ?? {};
@@ -45,7 +46,19 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
   const summary = [zone, durationLabel(initial.duration), initial.language, initial.platform, registrationLabel[initial.registration]];
 
   return (
-    <form ref={formRef} action={action} className="space-y-5">
+    <form
+      ref={formRef}
+      action={action}
+      // Submit through a transition instead of the form action, so React does not clear
+      // the fields when the server rejects them; the person keeps what they typed and chose.
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        startTransition(() => action(data));
+      }}
+      onReset={() => setPaid(initial.paid)}
+      className="space-y-5"
+    >
       <input type="hidden" name="slug" value={initial.slug} />
 
       <Field label="Title" error={errors.title}>
@@ -77,6 +90,7 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
                 name="paid"
                 value={option.value}
                 defaultChecked={(option.value === "paid") === initial.paid}
+                onChange={() => setPaid(option.value === "paid")}
                 className="sr-only"
               />
               <span className="text-[0.9375rem] font-medium">{option.label}</span>
@@ -84,6 +98,11 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
             </label>
           ))}
         </div>
+        {paid && !paymentsLive ? (
+          <p className="mt-2 text-[0.875rem] text-alert">
+            Online payment is not connected yet, so nobody can register for a paid lecture. Choose Free for now.
+          </p>
+        ) : null}
       </fieldset>
 
       <Field label="Joining link" hint="Private, for confirmed registrants">
