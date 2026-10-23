@@ -28,7 +28,8 @@ const amiri = localFont({
   variable: "--font-amiri",
   display: "swap",
   preload: false,
-  src: [{ path: "./_fonts/amiri-arabic-400.woff2", weight: "400", style: "normal" }],
+  // Only the Arabic letters the site shows; regenerate with scripts/subset-arabic-font.py after changing Arabic text.
+  src: [{ path: "./_fonts/amiri-arabic-400-subset.woff2", weight: "400", style: "normal" }],
 });
 
 export const metadata: Metadata = {

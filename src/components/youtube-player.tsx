@@ -43,7 +43,6 @@ export function YouTubePlayer({
             alt=""
             fill
             sizes="(min-width: 1024px) 40rem, 100vw"
-            unoptimized={!image}
             className="object-cover"
           />
           <span className="absolute inset-0 bg-forest-deep/15 transition-colors group-hover:bg-forest-deep/25" />

@@ -28,7 +28,9 @@ function HeroBackground({ className = "" }: { className?: string }) {
       src={background.src}
       alt=""
       fill
-      priority
+      // The largest element on first load: fetch it ahead of scripts and fonts.
+      preload
+      fetchPriority="high"
       quality={90}
       sizes="100vw"
       className={`object-cover ${className}`}
@@ -43,7 +45,7 @@ function Portrait({ className = "" }: { className?: string }) {
       alt={site.portrait?.alt ?? site.name}
       width={cutout.width}
       height={cutout.height}
-      priority
+      preload
       quality={90}
       sizes="(min-width: 1024px) 43rem, 90vw"
       className={`absolute bottom-0 w-auto max-w-none -translate-x-1/2 ${className}`}

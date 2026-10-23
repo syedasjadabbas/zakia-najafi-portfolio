@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
   // The floating "N" badge is the Next.js development indicator; keep review screenshots clean.
   devIndicators: false,
   // 90 is used for the hero portrait so the optimiser adds no visible compression to a small source.
-  images: { qualities: [75, 90] },
+  images: {
+    qualities: [75, 90],
+    // YouTube thumbnails are fetched and resized by this site, so visitors' browsers
+    // contact YouTube only once they press play.
+    remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" }],
+  },
   async headers() {
     return [
       {
