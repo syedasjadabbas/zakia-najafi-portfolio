@@ -57,7 +57,12 @@ export function Courses() {
           </p>
         </div>
 
-        <ul className="mt-12 grid gap-5 md:grid-cols-2">
+        {/* Phones and tablets: the books photograph between the introduction and the courses. */}
+        <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-[6px] md:mt-10 lg:hidden">
+          <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[60%_45%]" />
+        </div>
+
+        <ul className="mt-8 grid gap-5 md:mt-12 md:grid-cols-2">
           {site.courses.map((course, index) => {
             const rows = details(course);
             const Icon = index === 0 ? BookTextIcon : QuranIcon;
@@ -65,8 +70,9 @@ export function Courses() {
               ? { href: `mailto:${site.email}?subject=${encodeURIComponent(course.title)}`, label: "Ask about a place" }
               : { href: "#contact", label: "Stay informed" };
             return (
-              <li key={course.title} className="panel flex flex-col p-7 md:p-8">
-                <div className="flex items-start gap-5">
+              <li key={course.title} className="panel flex flex-col p-6 sm:p-7 md:p-8">
+                {/* phones: icon above, so the text uses the full card width */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
                   <Icon size={40} className="shrink-0 text-brass-dark" />
                   <div className="min-w-0 flex-1">
                     <h3 className="text-[1.75rem] leading-tight">{course.title}</h3>
@@ -102,10 +108,6 @@ export function Courses() {
         </ul>
         </div>
 
-        {/* Phones and tablets: the books photograph below the courses. */}
-        <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-[6px] lg:hidden">
-          <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[60%_45%]" />
-        </div>
       </div>
     </section>
   );

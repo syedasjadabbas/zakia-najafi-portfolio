@@ -92,16 +92,17 @@ function FeaturedLecture({ lecture, status }: { lecture: Lecture; status: Lectur
     <article className="panel grid overflow-hidden text-ink lg:grid-cols-[13rem_1fr_17rem]">
       <time
         dateTime={lecture.startsAt}
-        className="flex items-baseline gap-4 border-b border-line px-7 py-6 lg:block lg:border-b-0 lg:border-r lg:px-8 lg:py-9"
+        className="flex items-baseline gap-3 border-b border-line px-6 py-4 sm:gap-4 sm:px-7 sm:py-6 lg:block lg:border-b-0 lg:border-r lg:px-8 lg:py-9"
       >
-        <span className="block font-serif text-[3.5rem] leading-none text-brass-dark lg:text-[5rem]">{day}</span>
-        <span className="block lg:mt-3">
+        <span className="block font-serif text-[2.75rem] leading-none text-brass-dark sm:text-[3.5rem] lg:text-[5rem]">{day}</span>
+        {/* phones: month and weekday on one line beside the day; from sm, stacked */}
+        <span className="flex items-baseline gap-2 sm:block lg:mt-3">
           <span className="block text-[0.875rem] font-medium uppercase tracking-[0.14em] text-forest">{month}</span>
-          <span className="mt-0.5 block text-[0.9375rem] text-soft">{weekday}</span>
+          <span className="block text-[0.9375rem] text-soft sm:mt-0.5">{weekday}</span>
         </span>
       </time>
 
-      <div className="px-7 py-7 lg:px-10 lg:py-9">
+      <div className="px-6 py-6 sm:px-7 sm:py-7 lg:px-10 lg:py-9">
         <p className="eyebrow">Next lecture</p>
         <h3 className="mt-3 text-[1.875rem] leading-[1.15] md:text-[2.25rem]">
           <Link href={`/lectures/${lecture.slug}`} className="transition-colors hover:text-forest">
@@ -114,7 +115,7 @@ function FeaturedLecture({ lecture, status }: { lecture: Lecture; status: Lectur
         </div>
       </div>
 
-      <div className="flex flex-col justify-between gap-6 border-t border-line bg-sand/50 px-7 py-7 lg:border-l lg:border-t-0 lg:px-8 lg:py-9">
+      <div className="flex flex-col justify-between gap-5 border-t border-line bg-sand/50 px-6 py-6 sm:gap-6 sm:px-7 sm:py-7 lg:border-l lg:border-t-0 lg:px-8 lg:py-9">
         <div>
           <p className={`text-[0.8125rem] font-medium uppercase tracking-[0.12em] ${open ? "text-forest" : "text-brass-dark"}`}>
             {statusText[status]}

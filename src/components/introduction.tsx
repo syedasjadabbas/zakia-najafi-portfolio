@@ -57,10 +57,10 @@ export function Introduction() {
   return (
     <section aria-labelledby="intro-title" className="relative overflow-hidden">
       {/* Phones and tablets: the arch scene above the text, with her centred in the arch. */}
-      <div className="relative h-[26rem] overflow-hidden bg-[#efe7d9] sm:h-[32rem] lg:hidden">
+      <div className="relative h-[22rem] overflow-hidden bg-[#efe7d9] sm:h-[32rem] lg:hidden">
         <HeroBackground className="object-[86%_100%] sm:object-[100%_100%]" />
-        {/* left = where the arch centre lands for the image size at each breakpoint */}
-        <Portrait className="left-[calc(0.86*(100%-1012px)+738px)] h-[88%] sm:left-[calc(100%-338px)] sm:h-[90%]" />
+        {/* left = where the arch centre lands for the image size at each breakpoint (22rem tall → 856px wide, arch at 624px) */}
+        <Portrait className="left-[calc(0.86*(100%-856px)+624px)] h-[82%] sm:left-[calc(100%-338px)] sm:h-[90%]" />
       </div>
 
       {/* Desktop: the photo covers the hero; the arch centre always sits at 72.9% across. */}
@@ -72,7 +72,7 @@ export function Introduction() {
         </div>
 
         <div className="container-page relative flex min-h-[inherit] items-center">
-          <div className="w-full pb-12 pt-8 lg:w-[44%] lg:py-12 xl:w-[46%]">
+          <div className="flex w-full flex-col pb-10 pt-6 sm:block sm:pb-12 sm:pt-8 lg:w-[44%] lg:py-12 xl:w-[46%]">
             <p
               lang="ar"
               dir="rtl"
@@ -82,22 +82,22 @@ export function Introduction() {
             </p>
             <h1
               id="intro-title"
-              className="mt-6 text-[3.5rem] leading-[0.95] tracking-[-0.03em] text-ink sm:mt-8 sm:text-[4.75rem] lg:text-[4.5rem] xl:text-[5.5rem] 2xl:text-[6.25rem]"
+              className="mt-4 text-[3.5rem] leading-[0.95] tracking-[-0.03em] text-ink sm:mt-8 sm:text-[4.75rem] lg:text-[4.5rem] xl:text-[5.5rem] 2xl:text-[6.25rem]"
             >
               Zakia Batool
               <span className="block italic text-forest">Najafi</span>
             </h1>
 
-            <p className="mt-8 font-serif text-[1.375rem] leading-snug text-ink md:text-[1.5rem]">
+            <p className="mt-5 font-serif text-[1.375rem] leading-snug text-ink sm:mt-8 md:text-[1.5rem]">
               {site.qualification}
             </p>
 
-            <p className="mt-5 max-w-[34rem] font-serif text-[1.1875rem] leading-[1.6] text-soft md:text-[1.3125rem]">
+            <p className="order-last mt-7 max-w-[34rem] font-serif text-[1.1875rem] leading-[1.6] text-soft sm:mt-5 md:text-[1.3125rem]">
               {site.introduction}
             </p>
 
             {/* The one filled button on the page: registering for a live lecture. */}
-            <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 sm:mt-9 sm:gap-y-4">
               <HeroCta />
               <Link
                 href="#recordings"
@@ -120,15 +120,14 @@ export function Introduction() {
       </div>
 
       <nav aria-label="Teaching" className="relative">
-        <ul className="container-page grid border-t border-line sm:grid-cols-2 lg:grid-cols-4 lg:border-t-0">
+        <ul className="container-page grid grid-cols-2 border-t border-line lg:grid-cols-4 lg:border-t-0">
           {teaching.map(({ label, note, href, Icon }, index) => (
             <li
               key={label}
               className={[
                 "border-line",
-                index === 1 ? "border-t sm:border-t-0" : "",
                 index > 1 ? "border-t lg:border-t-0" : "",
-                index % 2 === 1 ? "sm:border-l" : "",
+                index % 2 === 1 ? "border-l" : "",
                 index === 2 ? "lg:border-l" : "",
                 "lg:my-5",
               ].join(" ")}
@@ -136,16 +135,16 @@ export function Introduction() {
               <Link
                 href={href}
                 className={[
-                  "group flex items-center gap-4 py-5 transition-colors hover:text-forest sm:py-6 lg:justify-center lg:py-1",
+                  "group flex flex-col items-start gap-2.5 py-5 pr-3 transition-colors hover:text-forest sm:flex-row sm:items-center sm:gap-4 sm:py-6 sm:pr-0 lg:justify-center lg:py-1",
                   index === 0 ? "lg:justify-start" : "",
-                  index % 2 === 1 ? "sm:pl-6 lg:pl-0" : "",
+                  index % 2 === 1 ? "pl-4 sm:pl-6 lg:pl-0" : "",
                 ].join(" ")}
               >
                 <span className="shrink-0 text-brass-dark transition-colors group-hover:text-forest">
                   <Icon size={36} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-serif text-[1.25rem] leading-snug">{label}</span>
+                  <span className="block font-serif text-[1.125rem] leading-snug sm:text-[1.25rem]">{label}</span>
                   <span className="block font-serif text-[0.9688rem] text-soft">{note}</span>
                 </span>
               </Link>
