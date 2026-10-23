@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import { getLecture } from "@/content/lectures";
 import { site } from "@/content/site";
@@ -8,7 +9,12 @@ import { sendEmail } from "@/lib/email";
 import { formatDate, formatTime } from "@/lib/format";
 import { getGateway } from "@/lib/payment-gateways";
 import { getPaymentMethod, getPaymentRegion, paymentsComingSoonNotice } from "@/lib/payment-options";
-import { createRegistration, transitionRegistration, type PaymentMethod } from "@/lib/registrations";
+import {
+  createRegistration,
+  deleteExpiredRegistrations,
+  transitionRegistration,
+  type PaymentMethod,
+} from "@/lib/registrations";
 
 export type RegisterState = {
   message?: string;
@@ -27,6 +33,8 @@ const schema = z.object({
 });
 
 export async function register(slug: string, _prev: RegisterState, formData: FormData): Promise<RegisterState> {
+  // After the response: remove registrations past the retention period in the privacy notice.
+  after(() => deleteExpiredRegistrations().catch((error) => console.error("Retention cleanup failed", error)));
   const raw = {
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),

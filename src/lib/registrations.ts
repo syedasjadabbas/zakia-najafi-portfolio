@@ -3,6 +3,7 @@ import "server-only";
 import type { Lecture, Price } from "@/content/lectures";
 import { getDb, isUniqueViolation, type Query } from "./db";
 import { getLectureStatus } from "./lecture-status";
+import { retentionCutoff } from "./retention";
 import { createAccessToken, hashToken, newId } from "./tokens";
 
 export type RegistrationStatus =
@@ -138,6 +139,18 @@ export async function listRegistrations(): Promise<Registration[]> {
      order by case status when 'pending_verification' then 0 else 1 end, created_at desc
      limit 500`,
   );
+}
+
+/**
+ * Deletes registrations older than the retention period stated in the privacy
+ * notice. Cheap to call often; returns how many were removed.
+ */
+export async function deleteExpiredRegistrations(now: Date = new Date()): Promise<number> {
+  const db = await getDb();
+  const rows = await db.query<{ id: string }>(`delete from registrations where created_at < $1 returning id`, [
+    retentionCutoff(now).toISOString(),
+  ]);
+  return rows.length;
 }
 
 /** Moves a registration between statuses only if it is currently in one of `from`. */

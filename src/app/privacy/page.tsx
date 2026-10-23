@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/content/site";
+import { RETENTION_MONTHS } from "@/lib/retention";
 
 export const metadata: Metadata = {
   title: "Privacy",
@@ -43,12 +44,26 @@ export default function PrivacyPage() {
             <p>Card details, wallet PINs and one-time codes are entered only on the payment provider&rsquo;s own pages and never reach this website.</p>
           </Section>
 
-          <Section title="How it is used">
+          <Section title="Why it is used, and the legal basis">
             <p>
               Only to manage your registration: to confirm your place, check payment, show you the joining details for
               the lecture and, where needed, contact you about it. It is not sold, and it is not used or shared for
               marketing.
             </p>
+            <ul className="list-disc space-y-1 pl-6">
+              <li>
+                Your name, email address and payment details are needed to provide the place you asked for. Without
+                them you cannot be registered.
+              </li>
+              <li>
+                Your WhatsApp number is optional and used only with your consent, which you can withdraw at any time.
+              </li>
+              <li>
+                Keeping an accurate record of who registered and attended is in the legitimate interest of running the
+                lectures fairly.
+              </li>
+            </ul>
+            <p>No decisions about you are made automatically.</p>
           </Section>
 
           <Section title="Your private registration link">
@@ -65,7 +80,11 @@ export default function PrivacyPage() {
               <li>If email notifications are switched on, messages to you are sent through Resend.</li>
               <li>Paid lectures are processed by the payment provider you choose (JazzCash, Easypaisa or a card payment provider).</li>
             </ul>
-            <p>These services may store data outside your country. They receive only what they need to provide their service.</p>
+            <p>
+              They receive only what they need to provide their service. Some of them store data outside your country,
+              including in the United States; where they do, they protect it under their standard data-protection terms
+              (such as standard contractual clauses).
+            </p>
           </Section>
 
           <Section title="Recordings and cookies">
@@ -76,33 +95,49 @@ export default function PrivacyPage() {
               sites, under their own policies.
             </p>
             <p>
-              This website sets no tracking, analytics or advertising cookies. A single sign-in cookie is used only on
-              the administration page.
+              This website sets no tracking, analytics or advertising cookies. A single sign-in cookie, needed for
+              security, is used only on the administration page.
             </p>
           </Section>
 
-          <Section title="How long it is kept, and your choices">
+          <Section title="How long it is kept">
             <p>
-              Registration details are kept so that lectures can be run and records of who attended remain accurate.
-              You can ask at any time to see, correct or delete your details
+              Registration details are deleted automatically {RETENTION_MONTHS} months after you register. You can ask
+              for them to be deleted sooner.
+            </p>
+          </Section>
+
+          <Section title="Your rights">
+            <p>
+              You can ask to see the information held about you, to have it corrected or deleted, to restrict or object
+              to its use, or to receive a copy of it. To do so
               {site.email ? (
                 <>
-                  {" "}
-                  by writing to{" "}
+                  , write to{" "}
                   <a className="link text-forest" href={`mailto:${site.email}`}>
                     {site.email}
                   </a>
                 </>
               ) : (
                 <>
-                  {" "}
-                  through the{" "}
+                  , use the{" "}
                   <Link href="/#contact" className="link text-forest">
                     contact details on this website
                   </Link>
                 </>
               )}
-              .
+              . Requests are answered within one month.
+            </p>
+            <p>
+              If you are unhappy with how your information is handled, you can complain to the data protection
+              authority where you live; in the United Kingdom, that is the Information Commissioner&rsquo;s Office
+              (ico.org.uk).
+            </p>
+          </Section>
+
+          <Section title="Changes to this notice">
+            <p>
+              If this notice changes, the new version is published here with a new date at the top.
             </p>
           </Section>
 

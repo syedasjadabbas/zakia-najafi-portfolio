@@ -8,6 +8,7 @@ import { isEmailConfigured } from "@/lib/email";
 import { formatPrice, formatTime } from "@/lib/format";
 import { getLiveMethodIds } from "@/lib/payment-gateways";
 import {
+  deleteExpiredRegistrations,
   getAllAccessInstructions,
   listRegistrations,
   type Registration,
@@ -105,6 +106,7 @@ const hasEnded = (lecture: Lecture) =>
   new Date(lecture.startsAt).getTime() + lecture.durationMinutes * 60_000 < Date.now();
 
 async function Dashboard({ editSlug }: { editSlug: string | null }) {
+  await deleteExpiredRegistrations(); // keeps the retention period promised in the privacy notice
   const [lectures, allRegistrations, access, stored] = await Promise.all([
     getLectures(),
     listRegistrations(),

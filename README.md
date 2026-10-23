@@ -62,6 +62,10 @@ Manual approval at `/admin` (approve, reject, revoke) remains available for regi
 
 Safeguards: capacity is enforced inside a database transaction (tested with concurrent submissions); one active registration per email per lecture; a transaction reference cannot be reused; all input is validated on the server; spam is filtered by a honeypot field.
 
+### Retention
+
+Registrations are deleted automatically 12 months after they were made (`RETENTION_MONTHS` in `src/lib/retention.ts`), each time the admin page opens and after every new registration. The privacy notice quotes the same number. Before paid lectures go live, check whether payment records must be kept longer for tax purposes and adjust both together.
+
 ### Access to joining instructions
 
 Each registrant gets an unguessable private link (`/registration/<token>`). Only a SHA-256 hash of the token is stored. Joining instructions appear there only once the registration is confirmed. These pages send `noindex` and `no-referrer` headers and are disallowed in `robots.txt`.
