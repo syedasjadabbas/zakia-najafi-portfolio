@@ -1,3 +1,5 @@
+import type { LectureFees } from "@/lib/payment-options";
+
 /**
  * Live lectures.
  *
@@ -41,6 +43,8 @@ export type Lecture = {
   platform: string;
   /** Paid lectures charge the fee for the payment region the visitor chooses. */
   paid: boolean;
+  /** This lecture's own fees, set in the admin panel. Paid lectures without them use the defaults. */
+  fees?: LectureFees;
   capacity?: number;
   registrationDeadline?: string;
   registration: "open" | "closed" | "not-yet-open";

@@ -87,6 +87,9 @@ create table if not exists lectures (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- Per-lecture fees in whole rupees and US cents. Added after launch, so also applied to existing tables.
+alter table lectures add column if not exists fee_pkr integer check (fee_pkr is null or fee_pkr > 0);
+alter table lectures add column if not exists fee_usd_cents integer check (fee_usd_cents is null or fee_usd_cents > 0);
 `;
 
 declare global {

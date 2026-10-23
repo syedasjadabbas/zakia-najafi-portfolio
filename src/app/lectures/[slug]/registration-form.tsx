@@ -8,8 +8,9 @@ import { RegionSelector } from "@/components/payment/region-selector";
 import {
   getPaymentMethod,
   getPaymentRegion,
-  paymentRegions,
   paymentsComingSoonNotice,
+  regionsWithFees,
+  type LectureFees,
   type PaymentMethodId,
   type PaymentRegionId,
 } from "@/lib/payment-options";
@@ -19,11 +20,13 @@ type Props = {
   slug: string;
   lectureTitle: string;
   paid: boolean;
+  /** The lecture's own fees; paid lectures without them use the defaults. */
+  fees?: LectureFees;
   /** Methods whose gateway is live and configured on the server. */
   liveMethodIds: PaymentMethodId[];
 };
 
-export function RegistrationForm({ slug, lectureTitle, paid, liveMethodIds }: Props) {
+export function RegistrationForm({ slug, lectureTitle, paid, fees, liveMethodIds }: Props) {
   const [state, action, pending] = useActionState<RegisterState, FormData>(register.bind(null, slug), {});
   const errors = state.errors ?? {};
   const formRef = useRef<HTMLFormElement>(null);
@@ -32,7 +35,8 @@ export function RegistrationForm({ slug, lectureTitle, paid, liveMethodIds }: Pr
     (state.values?.region as PaymentRegionId | undefined) ?? null,
   );
   const [methodId, setMethodId] = useState<PaymentMethodId | null>(null);
-  const region = getPaymentRegion(regionId) ?? null;
+  const regions = regionsWithFees(fees);
+  const region = getPaymentRegion(regionId, fees) ?? null;
   const method = region ? (getPaymentMethod(region, methodId) ?? null) : null;
   const regionHasLiveMethod = Boolean(region?.methods.some((m) => liveMethodIds.includes(m.id)));
   const canProceed = Boolean(region && method && liveMethodIds.includes(method.id));
@@ -40,7 +44,7 @@ export function RegistrationForm({ slug, lectureTitle, paid, liveMethodIds }: Pr
   function chooseRegion(id: PaymentRegionId) {
     setRegionId(id);
     // Preselect the first available method in the new region, if any.
-    const next = getPaymentRegion(id)?.methods.find((m) => liveMethodIds.includes(m.id));
+    const next = getPaymentRegion(id, fees)?.methods.find((m) => liveMethodIds.includes(m.id));
     setMethodId(next?.id ?? null);
   }
 
@@ -84,7 +88,7 @@ export function RegistrationForm({ slug, lectureTitle, paid, liveMethodIds }: Pr
 
       {paid ? (
         <>
-          <RegionSelector regions={paymentRegions} value={regionId} onChange={chooseRegion} error={errors.region} />
+          <RegionSelector regions={regions} value={regionId} onChange={chooseRegion} error={errors.region} />
 
           {region ? (
             <MethodOptions

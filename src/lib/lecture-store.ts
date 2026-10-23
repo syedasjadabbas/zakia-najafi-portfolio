@@ -21,6 +21,8 @@ type LectureRow = {
   capacity: number | null;
   registration_deadline: Date | string | null;
   registration: Lecture["registration"];
+  fee_pkr: number | null;
+  fee_usd_cents: number | null;
 };
 
 const iso = (value: Date | string) => new Date(value).toISOString();
@@ -39,6 +41,10 @@ function toLecture(row: LectureRow): Lecture {
     capacity: row.capacity === null ? undefined : Number(row.capacity),
     registrationDeadline: row.registration_deadline ? iso(row.registration_deadline) : undefined,
     registration: row.registration,
+    fees:
+      row.fee_pkr !== null && row.fee_usd_cents !== null
+        ? { pkr: Number(row.fee_pkr), usdCents: Number(row.fee_usd_cents) }
+        : undefined,
   };
 }
 
@@ -59,14 +65,15 @@ export async function saveStoredLecture(lecture: Lecture): Promise<void> {
   await db.query(
     `insert into lectures
        (slug, title, description, starts_at, duration_minutes, time_zone, language, platform, paid,
-        capacity, registration_deadline, registration)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        capacity, registration_deadline, registration, fee_pkr, fee_usd_cents)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
      on conflict (slug) do update set
        title = excluded.title, description = excluded.description, starts_at = excluded.starts_at,
        duration_minutes = excluded.duration_minutes, time_zone = excluded.time_zone,
        language = excluded.language, platform = excluded.platform, paid = excluded.paid,
        capacity = excluded.capacity, registration_deadline = excluded.registration_deadline,
-       registration = excluded.registration, updated_at = now()`,
+       registration = excluded.registration, fee_pkr = excluded.fee_pkr,
+       fee_usd_cents = excluded.fee_usd_cents, updated_at = now()`,
     [
       lecture.slug,
       lecture.title,
@@ -80,6 +87,8 @@ export async function saveStoredLecture(lecture: Lecture): Promise<void> {
       lecture.capacity ?? null,
       lecture.registrationDeadline ?? null,
       lecture.registration,
+      lecture.paid ? (lecture.fees?.pkr ?? null) : null,
+      lecture.paid ? (lecture.fees?.usdCents ?? null) : null,
     ],
   );
 }

@@ -107,6 +107,7 @@ async function LectureDetails({ params }: { params: PageProps<"/lectures/[slug]"
             slug={lecture.slug}
             lectureTitle={lecture.title}
             paid={lecture.paid}
+            fees={lecture.fees}
             liveMethodIds={liveMethodIds}
           />
         ) : (

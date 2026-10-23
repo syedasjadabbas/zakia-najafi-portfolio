@@ -45,6 +45,14 @@ describe("lectures published from the admin panel", () => {
     expect(saved).toMatchObject({ title: "New title", paid: false, capacity: undefined, startsAt: "2030-01-10T18:00:00.000Z" });
   });
 
+  it("keeps each paid lecture's own fees, and drops them when it becomes free", async () => {
+    await store.saveStoredLecture(lecture({ slug: "fee-lecture", paid: true, fees: { pkr: 1500, usdCents: 550 } }));
+    expect((await content.getLecture("fee-lecture"))?.fees).toEqual({ pkr: 1500, usdCents: 550 });
+
+    await store.saveStoredLecture(lecture({ slug: "fee-lecture", paid: false, fees: { pkr: 1500, usdCents: 550 } }));
+    expect((await content.getLecture("fee-lecture"))?.fees).toBeUndefined();
+  });
+
   it("can close and reopen registration", async () => {
     await store.setStoredLectureRegistration("admin-lecture", "closed");
     expect((await store.getStoredLecture("admin-lecture"))?.registration).toBe("closed");

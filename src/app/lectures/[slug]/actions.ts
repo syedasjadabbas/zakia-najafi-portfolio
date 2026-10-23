@@ -59,7 +59,8 @@ export async function register(slug: string, _prev: RegisterState, formData: For
     }
   }
 
-  const region = lecture.paid ? getPaymentRegion(raw.region) : undefined;
+  // The lecture's own fees: the amount charged always comes from the server, never from the form.
+  const region = lecture.paid ? getPaymentRegion(raw.region, lecture.fees) : undefined;
   if (lecture.paid && !region) errors.region = "Please choose where you are paying from.";
   if (!parsed.success || Object.keys(errors).length) return { errors, values: raw };
 

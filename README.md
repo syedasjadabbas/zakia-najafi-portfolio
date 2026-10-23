@@ -44,9 +44,11 @@ From the same page each lecture can be edited, have registration closed or reope
 Flow: choose a lecture → Register → name, email, optional WhatsApp → payment region and method → gateway's secure page → private registration page → confirmation (only after verified payment) → joining instructions.
 
 - **Free lectures** (`paid: false`) are confirmed immediately.
-- **Paid lectures** (`paid: true`) show prices only on the registration page, never on the lecture cards. Fees and methods are configured once, in `src/lib/payment-options.ts`:
-  - Pakistan: **PKR 500**, via JazzCash or Easypaisa.
-  - International: **USD $2**, via international card payment.
+- **Paid lectures** (`paid: true`) show prices only on the registration page, never on the lecture cards. Each paid lecture has its own two fees, set in the admin form when **Paid** is chosen:
+  - Pakistan: any amount in **PKR** (whole rupees), via JazzCash or Easypaisa.
+  - International: any amount in **USD** (e.g. 5 or 2.50), via international card payment.
+
+  Paid lectures without fees of their own (published before this option existed) use PKR 500 / USD $2 (`defaultFees` in `src/lib/payment-options.ts`). The amount charged always comes from the server, never from the visitor's form. Payment methods are configured in the same file.
 - **Current state: UI only.** Every method is marked "coming soon", so "Proceed to payment" is disabled and the server refuses paid registrations with "Secure online payments will be available soon." No payment is simulated and no registration is confirmed.
 
 ### Connecting a payment gateway later

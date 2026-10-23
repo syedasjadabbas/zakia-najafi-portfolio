@@ -24,3 +24,20 @@ describe("payment options", () => {
     expect(getLiveMethodIds()).toEqual([]);
   });
 });
+
+describe("per-lecture fees", () => {
+  it("labels fees the way the site shows them", async () => {
+    const { feeLabel } = await import("@/lib/payment-options");
+    expect(feeLabel({ amount: 1500, currency: "PKR" })).toBe("PKR 1,500");
+    expect(feeLabel({ amount: 500, currency: "USD" })).toBe("USD $5");
+    expect(feeLabel({ amount: 250, currency: "USD" })).toBe("USD $2.50");
+  });
+
+  it("applies a lecture's own fees to both regions, and falls back to the defaults", async () => {
+    const { getPaymentRegion, regionsWithFees } = await import("@/lib/payment-options");
+    const custom = { pkr: 1000, usdCents: 500 };
+    expect(getPaymentRegion("pk", custom)?.fee).toEqual({ amount: 1000, currency: "PKR" });
+    expect(getPaymentRegion("intl", custom)?.feeLabel).toBe("USD $5");
+    expect(regionsWithFees().map((r) => r.feeLabel)).toEqual(["PKR 500", "USD $2"]);
+  });
+});

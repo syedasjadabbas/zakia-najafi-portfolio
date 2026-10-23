@@ -149,7 +149,9 @@ export type LectureFormState = {
   ok?: boolean;
   message?: string;
   slug?: string;
-  errors?: Partial<Record<"title" | "description" | "date" | "time" | "duration" | "capacity" | "timeZone" | "language" | "platform", string>>;
+  errors?: Partial<
+    Record<"title" | "description" | "date" | "time" | "duration" | "capacity" | "timeZone" | "language" | "platform" | "feePkr" | "feeUsd", string>
+  >;
 };
 
 const lectureSchema = z.object({
@@ -169,12 +171,24 @@ const lectureSchema = z.object({
     .refine((v) => v === "" || (/^\d+$/.test(v) && Number(v) > 0), "Use a whole number, or leave it empty."),
   registration: z.enum(["open", "not-yet-open", "closed"]),
   instructions: z.string().max(4000),
+  feePkr: z.string().trim(),
+  feeUsd: z.string().trim(),
 });
+
+/** Paid lectures: whole rupees for Pakistan, dollars and cents for international. */
+function parseFees(feePkr: string, feeUsd: string) {
+  const errors: NonNullable<LectureFormState["errors"]> = {};
+  const pkr = /^\d+$/.test(feePkr) ? Number(feePkr) : NaN;
+  if (!(pkr >= 1 && pkr <= 1_000_000)) errors.feePkr = "Enter the fee in rupees, e.g. 1000.";
+  const usd = /^\d+(\.\d{1,2})?$/.test(feeUsd) ? Number(feeUsd) : NaN;
+  if (!(usd >= 0.5 && usd <= 10_000)) errors.feeUsd = "Enter the fee in US dollars, e.g. 5 or 2.50.";
+  return { errors, fees: { pkr, usdCents: Math.round(usd * 100) } };
+}
 
 export async function saveLecture(_prev: LectureFormState, formData: FormData): Promise<LectureFormState> {
   await requireAdmin();
   const raw = Object.fromEntries(
-    ["slug", "title", "description", "date", "time", "timeZone", "duration", "language", "platform", "paid", "capacity", "registration", "instructions"].map(
+    ["slug", "title", "description", "date", "time", "timeZone", "duration", "language", "platform", "paid", "capacity", "registration", "instructions", "feePkr", "feeUsd"].map(
       (key) => [key, String(formData.get(key) ?? "")],
     ),
   );
@@ -188,6 +202,9 @@ export async function saveLecture(_prev: LectureFormState, formData: FormData): 
     return { errors, message: "Please check the highlighted fields." };
   }
   const data = parsed.data;
+  const paid = data.paid === "paid";
+  const fees = paid ? parseFees(data.feePkr, data.feeUsd) : null;
+  if (fees && Object.keys(fees.errors).length) return { errors: fees.errors, message: "Please check the fees." };
   const startsAt = zonedTimeToIso(data.date, data.time, data.timeZone);
   if (!startsAt) return { errors: { date: "Please check the date and time." } };
 
@@ -209,7 +226,8 @@ export async function saveLecture(_prev: LectureFormState, formData: FormData): 
     timeZone: data.timeZone,
     language: data.language,
     platform: data.platform,
-    paid: data.paid === "paid",
+    paid,
+    fees: fees?.fees,
     capacity: data.capacity ? Number(data.capacity) : undefined,
     registration: data.registration,
   });

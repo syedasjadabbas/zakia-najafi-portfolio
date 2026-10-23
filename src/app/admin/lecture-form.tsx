@@ -19,6 +19,10 @@ export type LectureFormValues = {
   capacity: string;
   registration: "open" | "not-yet-open" | "closed";
   instructions: string;
+  /** Whole rupees, e.g. "1000". */
+  feePkr: string;
+  /** US dollars, e.g. "2" or "2.50". */
+  feeUsd: string;
 };
 
 const durations = [30, 45, 60, 75, 90, 120, 150, 180];
@@ -78,7 +82,7 @@ export function LectureForm({ initial, paymentsLive }: { initial: LectureFormVal
         <legend className="text-[0.9375rem] font-medium">Admission</legend>
         <div className="mt-2 grid grid-cols-2 overflow-hidden rounded-[3px] border border-[#b8ac96]">
           {[
-            { value: "paid", label: "Paid", note: "PKR 500 / $2" },
+            { value: "paid", label: "Paid", note: "Set the fees below" },
             { value: "free", label: "Free", note: "Confirmed at once" },
           ].map((option, i) => (
             <label
@@ -97,6 +101,21 @@ export function LectureForm({ initial, paymentsLive }: { initial: LectureFormVal
               <span className="text-[0.8125rem] opacity-75">{option.note}</span>
             </label>
           ))}
+        </div>
+        {/* Kept in the form while Free is chosen, so switching back keeps what was typed. */}
+        <div hidden={!paid} className="mt-4 grid grid-cols-2 gap-3">
+          <Field label="Fee in Pakistan" error={errors.feePkr}>
+            <span className="relative block">
+              <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[0.9375rem] text-soft">PKR</span>
+              <input name="feePkr" defaultValue={initial.feePkr} inputMode="numeric" autoComplete="off" className="field pl-14" />
+            </span>
+          </Field>
+          <Field label="Fee outside Pakistan" error={errors.feeUsd}>
+            <span className="relative block">
+              <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[0.9375rem] text-soft">USD $</span>
+              <input name="feeUsd" defaultValue={initial.feeUsd} inputMode="decimal" autoComplete="off" className="field pl-[4.25rem]" />
+            </span>
+          </Field>
         </div>
         {paid && !paymentsLive ? (
           <p className="mt-2 text-[0.875rem] text-alert">

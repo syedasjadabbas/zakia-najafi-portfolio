@@ -7,6 +7,7 @@ import { isAdmin, isAdminConfigured, MIN_PASSWORD_LENGTH } from "@/lib/admin-aut
 import { isEmailConfigured } from "@/lib/email";
 import { formatPrice, formatTime } from "@/lib/format";
 import { getLiveMethodIds } from "@/lib/payment-gateways";
+import { defaultFees, regionsWithFees } from "@/lib/payment-options";
 import {
   deleteExpiredRegistrations,
   getAllAccessInstructions,
@@ -135,6 +136,8 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
         capacity: editing.capacity ? String(editing.capacity) : "",
         registration: editing.registration,
         instructions: access.get(editing.slug) ?? "",
+        feePkr: String((editing.fees ?? defaultFees).pkr),
+        feeUsd: String((editing.fees ?? defaultFees).usdCents / 100),
       }
     : {
         slug: "",
@@ -150,6 +153,8 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
         capacity: "",
         registration: "open",
         instructions: "",
+        feePkr: String(defaultFees.pkr),
+        feeUsd: String(defaultFees.usdCents / 100),
       };
 
   const upcoming = lectures.filter((l) => !hasEnded(l));
@@ -306,7 +311,13 @@ function LectureRow({
           </div>
           <p className="mt-0.5 text-[0.875rem] text-soft">
             <span className="sr-only">{zoned({ dateStyle: "long" })}, </span>
-            {zoned({ weekday: "short" })} {formatTime(lecture.startsAt, lecture.timeZone)} · {lecture.paid ? "Paid" : "Free"} ·{" "}
+            {zoned({ weekday: "short" })} {formatTime(lecture.startsAt, lecture.timeZone)} ·{" "}
+            {lecture.paid
+              ? regionsWithFees(lecture.fees)
+                  .map((region) => region.feeLabel)
+                  .join(" / ")
+              : "Free"}{" "}
+            ·{" "}
             <span className={lecture.registration === "open" ? "text-forest" : ""}>{registrationText[lecture.registration]}</span>
           </p>
 
