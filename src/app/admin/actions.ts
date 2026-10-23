@@ -6,8 +6,11 @@ import { getLecture, getLectures } from "@/content/lectures";
 import { site } from "@/content/site";
 import {
   checkPassword,
+  clearFailedSignIns,
   endAdminSession,
+  isLockedOut,
   MIN_PASSWORD_LENGTH,
+  recordFailedSignIn,
   requireAdmin,
   setAdminPassword,
   startAdminSession,
@@ -22,28 +25,28 @@ import {
   uniqueSlug,
   zonedTimeToIso,
 } from "@/lib/lecture-store";
-import { getRegistration, setAccessInstructions, transitionRegistration } from "@/lib/registrations";
+import {
+  deleteRegistration as removeRegistration,
+  getRegistration,
+  setAccessInstructions,
+  transitionRegistration,
+} from "@/lib/registrations";
 
 export type LoginState = { error?: string };
 
-const failedAttempts = new Map<string, { count: number; until: number }>();
+const TOO_MANY = "Too many attempts. Please wait a few minutes and try again.";
+const slowDown = () => new Promise((resolve) => setTimeout(resolve, 600));
 
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
-  const key = "admin";
-  const now = Date.now();
-  const record = failedAttempts.get(key);
-  if (record && record.until > now) {
-    return { error: "Too many attempts. Please wait a few minutes and try again." };
-  }
+  if (await isLockedOut()) return { error: TOO_MANY };
 
   if (!(await checkPassword(String(formData.get("password") ?? "")))) {
-    const count = (record?.count ?? 0) + 1;
-    failedAttempts.set(key, { count, until: count >= 5 ? now + 5 * 60_000 : 0 });
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    return { error: "That password is not correct." };
+    await recordFailedSignIn();
+    await slowDown();
+    return { error: (await isLockedOut()) ? TOO_MANY : "That password is not correct." };
   }
 
-  failedAttempts.delete(key);
+  await clearFailedSignIns();
   await startAdminSession();
   refresh();
   return {};
@@ -61,16 +64,11 @@ export async function changePassword(_prev: PasswordState, formData: FormData): 
   const next = String(formData.get("next") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
 
-  const key = "admin";
-  const now = Date.now();
-  const record = failedAttempts.get(key);
-  if (record && record.until > now) {
-    return { message: "Too many attempts. Please wait a few minutes and try again." };
-  }
+  if (await isLockedOut()) return { message: TOO_MANY };
   if (!(await checkPassword(current))) {
-    const count = (record?.count ?? 0) + 1;
-    failedAttempts.set(key, { count, until: count >= 5 ? now + 5 * 60_000 : 0 });
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await recordFailedSignIn();
+    await slowDown();
+    if (await isLockedOut()) return { message: TOO_MANY };
     return { errors: { current: "That is not the current password." } };
   }
 
@@ -81,7 +79,7 @@ export async function changePassword(_prev: PasswordState, formData: FormData): 
   if (next === current) return { errors: { next: "Choose a password different from the current one." } };
   if (next !== confirm) return { errors: { confirm: "The two new passwords do not match." } };
 
-  failedAttempts.delete(key);
+  await clearFailedSignIns();
   await setAdminPassword(next);
   await startAdminSession(); // keep this device signed in; every other device is signed out
   return { ok: true, message: "Password changed. Use the new password next time you sign in." };
@@ -107,6 +105,13 @@ export async function rejectRegistration(formData: FormData) {
   if (await transitionRegistration(id, ["pending_verification", "confirmed"], "rejected")) {
     await notify(id, "rejected");
   }
+  refresh();
+}
+
+/** Permanently removes a registration, for example when the person asks for their details to be deleted. */
+export async function deleteRegistration(formData: FormData) {
+  await requireAdmin();
+  await removeRegistration(String(formData.get("id")));
   refresh();
 }
 

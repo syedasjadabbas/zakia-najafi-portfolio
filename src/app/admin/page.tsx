@@ -18,11 +18,13 @@ import { isoToZonedParts, listStoredLectures } from "@/lib/lecture-store";
 import {
   approveRegistration,
   deleteLecture,
+  deleteRegistration,
   logout,
   rejectRegistration,
   saveAccessInstructions,
   setLectureRegistration,
 } from "./actions";
+import { ConfirmButton } from "./confirm-button";
 import { LectureForm, type LectureFormValues } from "./lecture-form";
 import { LoginForm } from "./login-form";
 import { PasswordForm } from "./password-form";
@@ -329,9 +331,12 @@ function LectureRow({
             {stored && registrations.length === 0 ? (
               <form action={deleteLecture}>
                 <input type="hidden" name="slug" value={lecture.slug} />
-                <button type="submit" className="link tap text-alert">
+                <ConfirmButton
+                  question={`Delete "${lecture.title}" from the website? This cannot be undone.`}
+                  className="link tap text-alert"
+                >
                   Delete
-                </button>
+                </ConfirmButton>
               </form>
             ) : null}
             {!instructions ? <span className="text-brass-dark">No joining link yet</span> : null}
@@ -414,6 +419,15 @@ function RegistrantList({ rows, titles }: { rows: Registration[]; titles?: Map<s
                 </button>
               </form>
             ) : null}
+            <form action={deleteRegistration}>
+              <input type="hidden" name="id" value={r.id} />
+              <ConfirmButton
+                question={`Delete ${r.name}'s registration permanently? This cannot be undone.`}
+                className="link tap text-soft"
+              >
+                Delete<span className="sr-only"> {r.name}</span>
+              </ConfirmButton>
+            </form>
           </div>
         </li>
       ))}

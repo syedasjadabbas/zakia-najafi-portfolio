@@ -60,6 +60,12 @@ create table if not exists processed_payment_events (
 );
 
 -- Lectures published from /admin (in addition to any in src/content/lectures.ts).
+create table if not exists sign_in_attempts (
+  key text primary key,
+  failures integer not null,
+  locked_until timestamptz,
+  updated_at timestamptz not null default now()
+);
 create table if not exists admin_settings (
   key text primary key,
   value text not null,

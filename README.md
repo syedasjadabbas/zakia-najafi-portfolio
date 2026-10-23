@@ -81,7 +81,8 @@ With `RESEND_API_KEY` and `EMAIL_FROM` set, registrants receive their private li
 - Set `DATABASE_URL`, `ADMIN_PASSWORD` and `SESSION_SECRET`. Tables are created automatically on first connection.
 - Canonical URLs, the sitemap and link previews use the Vercel production address automatically. After adding a custom domain, set `NEXT_PUBLIC_SITE_URL` to it (e.g. `https://www.example.com`) and redeploy.
 - A real PostgreSQL database is required in production. The embedded fallback writes to local disk, which is not persistent on serverless hosts.
-- The admin sign-in is a single shared password with an 8-hour signed cookie. Failed attempts are rate-limited in memory, per server instance.
+- The admin sign-in is a single shared password with an 8-hour signed cookie. After 5 wrong passwords within 15 minutes, sign-in and password changes pause for 5 minutes. The count is kept in the database, so it holds across all server instances and restarts.
+- A single registration can be deleted permanently from the admin page (with a confirmation), for example when someone asks for their details to be removed.
 - `ADMIN_PASSWORD` is only the first password. The administrator can change it under **Change password** at the bottom of `/admin`; the new one is stored in the database as a salted scrypt hash and replaces `ADMIN_PASSWORD`. Changing it signs out every other device.
 - Forgotten password: run `delete from admin_settings where key = 'password_hash';` on the database. Sign-in then falls back to `ADMIN_PASSWORD`.
 

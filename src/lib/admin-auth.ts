@@ -88,6 +88,45 @@ export async function setAdminPassword(password: string): Promise<void> {
   );
 }
 
+/* ---------- Failed sign-in attempts ---------- */
+// Kept in the database so the limit holds across every server instance and restart.
+
+const ATTEMPTS_KEY = "admin";
+export const MAX_FAILURES = 5;
+const LOCK_MINUTES = 5;
+const WINDOW_MINUTES = 15; // failures older than this are forgotten
+
+/** True while sign-in (and password changes) are paused after too many wrong passwords. */
+export async function isLockedOut(): Promise<boolean> {
+  const db = await getDb();
+  const rows = await db.query<{ locked: boolean }>(
+    `select locked_until > now() as locked from sign_in_attempts where key = $1`,
+    [ATTEMPTS_KEY],
+  );
+  return Boolean(rows[0]?.locked);
+}
+
+/** Counts a wrong password; the fifth within the window pauses sign-in for a few minutes. */
+export async function recordFailedSignIn(): Promise<void> {
+  const db = await getDb();
+  const failures = `case when sign_in_attempts.updated_at < now() - interval '${WINDOW_MINUTES} minutes'
+                      then 1 else sign_in_attempts.failures + 1 end`;
+  await db.query(
+    `insert into sign_in_attempts (key, failures) values ($1, 1)
+     on conflict (key) do update set
+       failures = ${failures},
+       locked_until = case when ${failures} >= ${MAX_FAILURES}
+                        then now() + interval '${LOCK_MINUTES} minutes' else sign_in_attempts.locked_until end,
+       updated_at = now()`,
+    [ATTEMPTS_KEY],
+  );
+}
+
+export async function clearFailedSignIns(): Promise<void> {
+  const db = await getDb();
+  await db.query(`delete from sign_in_attempts where key = $1`, [ATTEMPTS_KEY]);
+}
+
 /* ---------- Session ---------- */
 
 export async function startAdminSession(): Promise<void> {

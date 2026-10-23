@@ -141,6 +141,13 @@ export async function listRegistrations(): Promise<Registration[]> {
   );
 }
 
+/** Permanently deletes one registration, e.g. when its owner asks. Returns false if it did not exist. */
+export async function deleteRegistration(id: string): Promise<boolean> {
+  const db = await getDb();
+  const rows = await db.query<{ id: string }>(`delete from registrations where id = $1 returning id`, [id]);
+  return rows.length > 0;
+}
+
 /**
  * Deletes registrations older than the retention period stated in the privacy
  * notice. Cheap to call often; returns how many were removed.
