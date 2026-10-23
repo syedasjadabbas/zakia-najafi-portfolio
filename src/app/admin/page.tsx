@@ -168,12 +168,12 @@ async function Dashboard({ editSlug }: { editSlug: string | null }) {
 
   return (
     <>
-      <header className="flex items-center justify-between gap-4 border-b border-line pb-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-line pb-4">
         <div>
           <p className="eyebrow">Zakia Batool Najafi</p>
           <h1 className="font-serif text-[1.625rem] leading-tight">Administration</h1>
         </div>
-        <div className="flex items-center gap-5 text-[0.9375rem]">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.9375rem]">
           <Link href="/" className="link tap text-soft" target="_blank">
             Website
           </Link>
