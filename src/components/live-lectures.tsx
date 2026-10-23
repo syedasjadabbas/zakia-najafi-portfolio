@@ -117,7 +117,16 @@ function FeaturedLecture({ lecture, status }: { lecture: Lecture; status: Lectur
 
       <div className="flex flex-col justify-between gap-5 border-t border-line bg-sand/50 px-6 py-6 sm:gap-6 sm:px-7 sm:py-7 lg:border-l lg:border-t-0 lg:px-8 lg:py-9">
         <div>
-          <p className={`text-[0.8125rem] font-medium uppercase tracking-[0.12em] ${open ? "text-forest" : "text-brass-dark"}`}>
+          <p
+            className={`flex items-center gap-2.5 text-[0.8125rem] font-medium uppercase tracking-[0.12em] ${open ? "text-forest" : "text-brass-dark"}`}
+          >
+            {open ? (
+              // A small "live" pulse beside the open status.
+              <span aria-hidden className="relative inline-flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-forest/50 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-forest" />
+              </span>
+            ) : null}
             {statusText[status]}
           </p>
           {open && lecture.registrationDeadline ? (
@@ -215,7 +224,10 @@ async function LectureList() {
 
   return (
     <div>
-      <FeaturedLecture lecture={next.lecture} status={next.status} />
+      {/* The next lecture is the page's main call to action: a glowing brass ring draws the eye to it. */}
+      <div className="feature-ring">
+        <FeaturedLecture lecture={next.lecture} status={next.status} />
+      </div>
 
       {later.length ? (
         <div className="mt-14">

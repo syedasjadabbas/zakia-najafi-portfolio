@@ -250,3 +250,59 @@
     transform: translate(-50%, -50%);
   }
 }
+
+/*
+ * The next lecture's highlight: a brass ring with a point of light travelling
+ * around it, and a soft warm glow behind. Visitors who reduce motion see the
+ * same ring, still.
+ */
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: true;
+}
+
+.feature-ring {
+  position: relative;
+  isolation: isolate;
+  padding: 3px;
+  border-radius: 9px;
+  background: conic-gradient(
+    from var(--ring-angle),
+    var(--color-brass) 0deg,
+    var(--color-brass) 190deg,
+    var(--color-brass-light) 250deg,
+    #fff6dc 295deg,
+    #fffaf0 315deg,
+    var(--color-brass-light) 340deg,
+    var(--color-brass) 360deg
+  );
+  box-shadow: 0 22px 60px -24px color-mix(in srgb, var(--color-brass-light) 70%, transparent);
+  animation: ring-travel 5s linear infinite;
+}
+.feature-ring::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: 14px;
+  background: inherit;
+  filter: blur(22px);
+  opacity: 0.7;
+}
+.feature-ring > * {
+  border-color: transparent;
+}
+
+@keyframes ring-travel {
+  to {
+    --ring-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-ring {
+    animation: none;
+    --ring-angle: 300deg;
+  }
+}
