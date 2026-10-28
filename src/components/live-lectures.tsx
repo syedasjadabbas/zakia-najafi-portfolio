@@ -192,6 +192,8 @@ async function LectureList() {
 
   if (!current.length) {
     return (
+      // The same travelling light as the next lecture, so this card stays the section's focus.
+      <div className="feature-ring">
       <div className="panel grid overflow-hidden text-ink md:grid-cols-12">
         <div className="relative aspect-[16/10] md:col-span-5 md:aspect-auto md:min-h-[17rem]">
           <Image
@@ -216,6 +218,7 @@ async function LectureList() {
             <ArrowRightIcon className="arrow" />
           </Link>
         </div>
+      </div>
       </div>
     );
   }

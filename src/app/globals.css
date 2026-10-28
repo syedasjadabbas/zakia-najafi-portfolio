@@ -252,9 +252,9 @@
 }
 
 /*
- * The next lecture's highlight: a brass ring with a point of light travelling
- * around it, and a soft warm glow behind. Visitors who reduce motion see the
- * same ring, still.
+ * The next lecture's highlight: a brass ring with a neon point of light
+ * travelling around it, its glow moving with it. Visitors who reduce motion
+ * see the same ring, still.
  */
 @property --ring-angle {
   syntax: "<angle>";
@@ -269,26 +269,34 @@
   border-radius: 9px;
   background: conic-gradient(
     from var(--ring-angle),
-    var(--color-brass) 0deg,
-    var(--color-brass) 190deg,
-    var(--color-brass-light) 250deg,
-    #fff6dc 295deg,
-    #fffaf0 315deg,
-    var(--color-brass-light) 340deg,
-    var(--color-brass) 360deg
+    color-mix(in srgb, var(--color-brass) 55%, transparent) 0deg,
+    color-mix(in srgb, var(--color-brass) 55%, transparent) 230deg,
+    var(--color-brass-light) 280deg,
+    #ffe9a8 310deg,
+    #ffffff 325deg,
+    #ffe9a8 335deg,
+    color-mix(in srgb, var(--color-brass) 55%, transparent) 360deg
   );
   box-shadow: 0 22px 60px -24px color-mix(in srgb, var(--color-brass-light) 70%, transparent);
-  animation: ring-travel 5s linear infinite;
+  animation: ring-travel 4s linear infinite;
 }
+/* The neon glow: only the travelling light glows, so the halo roams with it. */
 .feature-ring::before {
   content: "";
   position: absolute;
-  inset: -6px;
+  inset: -10px;
   z-index: -1;
-  border-radius: 14px;
-  background: inherit;
-  filter: blur(22px);
-  opacity: 0.7;
+  border-radius: 18px;
+  background: conic-gradient(
+    from var(--ring-angle),
+    transparent 0deg,
+    transparent 250deg,
+    color-mix(in srgb, var(--color-brass-light) 70%, transparent) 295deg,
+    #ffd77a 325deg,
+    color-mix(in srgb, var(--color-brass-light) 70%, transparent) 345deg,
+    transparent 360deg
+  );
+  filter: blur(18px);
 }
 .feature-ring > * {
   border-color: transparent;
