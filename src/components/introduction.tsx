@@ -119,7 +119,7 @@ export function Introduction() {
         </div>
       </div>
 
-      <nav aria-label="Teaching" className="relative">
+      <nav aria-label="Teaching" className="relative bg-forest text-ivory">
         <ul className="container-page grid grid-cols-2 border-t border-line lg:grid-cols-4 lg:border-t-0">
           {teaching.map(({ label, note, href, Icon }, index) => (
             <li
@@ -135,17 +135,17 @@ export function Introduction() {
               <Link
                 href={href}
                 className={[
-                  "group flex flex-col items-start gap-2.5 py-5 pr-3 transition-colors hover:text-forest sm:flex-row sm:items-center sm:gap-4 sm:py-6 sm:pr-0 lg:justify-center lg:py-1",
+                  "group flex flex-col items-start gap-2.5 py-5 pr-3 transition-colors hover:text-brass-light sm:flex-row sm:items-center sm:gap-4 sm:py-6 sm:pr-0 lg:justify-center lg:py-1",
                   index === 0 ? "lg:justify-start" : "",
                   index % 2 === 1 ? "pl-4 sm:pl-6 lg:pl-0" : "",
                 ].join(" ")}
               >
-                <span className="shrink-0 text-brass-dark transition-colors group-hover:text-forest">
+                <span className="shrink-0 text-brass-light">
                   <Icon size={36} />
                 </span>
                 <span className="min-w-0">
                   <span className="block font-serif text-[1.125rem] leading-snug sm:text-[1.25rem]">{label}</span>
-                  <span className="block font-serif text-[0.9688rem] text-soft">{note}</span>
+                  <span className="block font-serif text-[0.9688rem] text-ivory/80">{note}</span>
                 </span>
               </Link>
             </li>
