@@ -13,7 +13,7 @@ export function LiveLectures() {
       <div className="container-page py-20 md:py-24">
         <div className="grid gap-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
-            <p className="eyebrow text-brass-light">Online · with registration</p>
+            <p className="eyebrow text-ivory">Online · with registration</p>
             <h2 id="lectures-title" className="mt-4 text-[2.5rem] leading-[1.05] tracking-[-0.015em] md:text-[3.5rem]">
               Live lectures
             </h2>
