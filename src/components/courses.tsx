@@ -59,8 +59,16 @@ export function Courses() {
         </div>
 
         {/* Phones and tablets: the books photograph between the introduction and the courses. */}
-        <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-[6px] md:mt-10 lg:hidden">
-          <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[60%_45%]" />
+        {/* Zoomed to the shelves alone: the photo's left edge is bare wall and its sides the cabinet frame. */}
+        <div className="relative mt-8 aspect-[4/3] overflow-hidden rounded-[6px] md:mt-10 md:aspect-[16/9] lg:hidden">
+          <Image
+            src="/images/courses-bookshelf.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={90}
+            className="origin-[55%_45%] scale-[1.2] object-cover object-[55%_45%]"
+          />
         </div>
 
         <ul className="mt-8 grid gap-5 md:mt-12 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
