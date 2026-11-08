@@ -20,7 +20,7 @@ export function Courses() {
         Qur'an 20:114, and the hadith of the Prophet (s) recorded in al-Kafi and Sunan Ibn Majah.
       */}
       {/* Scholar's bookshelf on the right (AI-generated, no people or text), fading into the sage. */}
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[40%] lg:block">
         <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="46vw" quality={90} className="object-cover object-[60%_50%]" />
         <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-forest-tint to-transparent" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-forest-tint to-transparent" />
@@ -44,7 +44,8 @@ export function Courses() {
       </div>
 
       <div className="container-page relative">
-        <div className="lg:w-[58%]">
+        {/* Ends a gap short of the bookshelf (the right 40%), whatever the page padding. */}
+        <div className="lg:max-w-[calc(60vw-clamp(1.25rem,5.5vw,7.5rem)-3rem)]">
         <div>
           <div>
             <p className="eyebrow">Courses</p>
@@ -62,7 +63,7 @@ export function Courses() {
           <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="100vw" quality={90} className="object-cover object-[60%_45%]" />
         </div>
 
-        <ul className="mt-8 grid gap-5 md:mt-12 md:grid-cols-2">
+        <ul className="mt-8 grid gap-5 md:mt-12 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           {site.courses.map((course, index) => {
             const rows = details(course);
             const Icon = index === 0 ? BookTextIcon : QuranIcon;
@@ -70,7 +71,11 @@ export function Courses() {
               ? { href: `mailto:${site.email}?subject=${encodeURIComponent(course.title)}`, label: "Ask about a place" }
               : { href: "#contact", label: "Stay informed" };
             return (
-              <li key={course.title} className="panel flex flex-col p-6 sm:p-7 md:p-8">
+              // A dark drop shadow with a light top edge, so the cards sit raised off the sage like embossed tiles.
+              <li
+                key={course.title}
+                className="panel flex flex-col p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_2px_4px_rgba(0,0,0,0.18),0_18px_36px_-14px_rgba(0,0,0,0.55)] sm:p-7 md:p-8"
+              >
                 {/* phones: icon above, so the text uses the full card width */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
                   <Icon size={40} className="shrink-0 text-brass-dark" />
