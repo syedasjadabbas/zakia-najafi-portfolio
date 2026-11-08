@@ -22,6 +22,8 @@ const cutout = { src: "/images/portrait-muharram-1448-cutout.png", width: 688, h
  */
 const background = { src: "/images/hero-arch-background-brown.webp", width: 1956, height: 804 };
 
+const bismillah = { src: "/images/bismillah-calligraphy.webp", width: 1200, height: 321 };
+
 function HeroBackground({ className = "" }: { className?: string }) {
   return (
     <Image
@@ -73,13 +75,17 @@ export function Introduction() {
 
         <div className="container-page relative flex min-h-[inherit] items-center">
           <div className="flex w-full flex-col pb-10 pt-6 sm:block sm:pb-12 sm:pt-8 lg:w-[44%] lg:py-12 xl:w-[46%]">
-            <p
+            {/* Supplied calligraphy, recoloured to the theme brown on a transparent ground. */}
+            <Image
+              src={bismillah.src}
+              alt="بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
               lang="ar"
-              dir="rtl"
-              className="text-left font-arabic text-[1.625rem] leading-none text-brass-dark md:text-[1.875rem]"
-            >
-              بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-            </p>
+              width={bismillah.width}
+              height={bismillah.height}
+              preload
+              sizes="(min-width: 768px) 18rem, 15rem"
+              className="h-auto w-[15rem] md:w-[18rem]"
+            />
             <h1
               id="intro-title"
               className="mt-4 text-[3.5rem] leading-[0.95] tracking-[-0.03em] text-ink sm:mt-8 sm:text-[4.75rem] lg:text-[4.5rem] xl:text-[5.5rem] 2xl:text-[6.25rem]"
