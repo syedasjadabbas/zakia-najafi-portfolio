@@ -20,7 +20,7 @@ const cutout = { src: "/images/portrait-muharram-1448-cutout.png", width: 688, h
  * (1956×804). The arch's centre is at 72.9% of its width, so both the photo
  * and the portrait are positioned from that point.
  */
-const background = { src: "/images/hero-arch-background.webp", width: 1956, height: 804 };
+const background = { src: "/images/hero-arch-background-brown.webp", width: 1956, height: 804 };
 
 function HeroBackground({ className = "" }: { className?: string }) {
   return (
