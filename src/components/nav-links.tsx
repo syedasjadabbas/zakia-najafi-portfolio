@@ -44,7 +44,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
   const active = useActiveSection(items);
 
   return (
-    <ul className="flex items-center gap-x-10 font-serif text-[1.125rem] font-semibold">
+    <ul className="flex items-center gap-x-10 font-serif text-[1.125rem] font-bold">
       {items.map((item) => {
         const isActive = active === item.href.split("#")[1];
         return (
