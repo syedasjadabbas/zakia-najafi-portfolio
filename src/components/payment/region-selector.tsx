@@ -30,7 +30,7 @@ export function RegionSelector({
               className={[
                 "relative flex cursor-pointer flex-col rounded-[6px] border p-5 transition-colors",
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brass",
-                selected ? "border-forest bg-forest-tint/45" : "border-line bg-[#fffdf8] hover:border-soft/50",
+                selected ? "border-forest bg-forest-tint/45" : "border-line bg-ivory hover:border-soft/50",
               ].join(" ")}
             >
               <input

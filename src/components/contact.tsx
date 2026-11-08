@@ -36,7 +36,10 @@ export function Contact() {
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3.5 rounded-[6px] py-1"
                 >
-                  <BrandIcon name={link.label} size={42} />
+                  {/* Site palette rather than brand colours: brown disc, cream mark. */}
+                  <span className="shrink-0 rounded-full bg-forest text-ivory">
+                    <BrandIcon name={link.label} size={42} tone="mono" />
+                  </span>
                   <span className="min-w-0">
                     <span className="block font-medium leading-snug transition-colors group-hover:text-forest">
                       {link.label}

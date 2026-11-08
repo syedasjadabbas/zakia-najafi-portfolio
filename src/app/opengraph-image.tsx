@@ -27,7 +27,7 @@ export default async function OpenGraphImage() {
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: "#fffaeb", color: "#2a1709" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#fffaeb", color: "#4e2c13" }}>
         <div
           style={{
             width: 640,
@@ -57,7 +57,7 @@ export default async function OpenGraphImage() {
           <div style={{ display: "flex", marginTop: 30, fontFamily: "Newsreader", fontSize: 32 }}>
             {site.qualification}
           </div>
-          <div style={{ display: "flex", marginTop: 14, fontFamily: "Plex", fontSize: 24, lineHeight: 1.45, color: "#5c4332" }}>
+          <div style={{ display: "flex", marginTop: 14, fontFamily: "Plex", fontSize: 24, lineHeight: 1.45, color: "#4e2c13" }}>
             Islamic lectures and majalis, Hawzah courses and Tafseer classes
           </div>
         </div>

@@ -80,14 +80,14 @@ export function LectureForm({ initial, paymentsLive }: { initial: LectureFormVal
 
       <fieldset>
         <legend className="text-[0.9375rem] font-medium">Admission</legend>
-        <div className="mt-2 grid grid-cols-2 overflow-hidden rounded-[3px] border border-[#b8ac96]">
+        <div className="mt-2 grid grid-cols-2 overflow-hidden rounded-[3px] border border-forest">
           {[
             { value: "paid", label: "Paid", note: "Set the fees below" },
             { value: "free", label: "Free", note: "Confirmed at once" },
           ].map((option, i) => (
             <label
               key={option.value}
-              className={`flex cursor-pointer flex-col px-4 py-2.5 transition-colors has-[:checked]:bg-forest has-[:checked]:text-ivory has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-forest/30 ${i ? "border-l border-[#b8ac96]" : ""}`}
+              className={`flex cursor-pointer flex-col px-4 py-2.5 transition-colors has-[:checked]:bg-forest has-[:checked]:text-ivory has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-forest/30 ${i ? "border-l border-forest" : ""}`}
             >
               <input
                 type="radio"

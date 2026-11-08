@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 /*
- * Identity (client palette): cream paper #FFFAEB, chocolate brown #4E2C13,
- * blush pink #FFD0DB and sage #BFD8B8. The token names predate the palette:
- * "forest" is the brown, "sand" the pink, "forest-tint" the sage, and the
- * "brass" accents are sage on cream and pink on brown.
+ * Identity: only the client's four colours, with no in-between shades —
+ * cream #FFFAEB, brown #4E2C13, pink #FFD0DB and sage #BFD8B8. The token
+ * names predate the palette, so several share one colour: all text, "forest"
+ * and "brass-dark" are the brown, "sand" and "brass-light" the pink, "line",
+ * "forest-tint" and "brass" the sage. Alert red stays for form errors only.
  *
- * Contrast on ivory: ink 16.4:1, soft 8.7:1, forest 11.9:1, brass-dark 6.8:1 (5.2:1 on sand).
- * On forest: ivory 11.9:1, brass-light 9:1.
- * Mid brass (2.7:1) is only used for decorative arrows and rules.
+ * Contrast: brown on cream 11.9:1, on pink 9:1, on sage 8.1:1; pink on brown 9:1.
+ * Sage on cream (1.4:1) is only used for rules, borders and the lecture ring.
  */
 @theme {
   --color-ivory: #fffaeb;
   --color-sand: #ffd0db;
-  --color-sand-deep: #f7b9c8;
-  --color-ink: #2a1709;
-  --color-soft: #5c4332;
-  --color-line: #ecdcc6;
+  --color-sand-deep: #ffd0db;
+  --color-ink: #4e2c13;
+  --color-soft: #4e2c13;
+  --color-line: #bfd8b8;
   --color-forest: #4e2c13;
-  --color-forest-deep: #3b200d;
+  --color-forest-deep: #4e2c13;
   --color-forest-tint: #bfd8b8;
-  --color-brass: #7fa274;
-  --color-brass-dark: #42603b;
+  --color-brass: #bfd8b8;
+  --color-brass-dark: #4e2c13;
   --color-brass-light: #ffd0db;
   --color-alert: #8f2d1c;
 
@@ -74,7 +74,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brass);
+    outline: 2px solid var(--color-forest);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -107,7 +107,7 @@
   /* Cream panel on dark or sand surfaces. */
   .panel {
     background: var(--color-ivory);
-    border: 1px solid color-mix(in srgb, var(--color-brass) 22%, var(--color-line));
+    border: 1px solid var(--color-line);
     border-radius: 6px;
   }
 
@@ -207,8 +207,8 @@
     width: 100%;
     min-height: 3rem;
     padding: 0.65rem 0.875rem;
-    background: #fffdf8;
-    border: 1px solid #b8ac96;
+    background: var(--color-ivory);
+    border: 1px solid var(--color-forest);
     border-radius: 3px;
     font: inherit;
     color: inherit;
@@ -274,9 +274,9 @@
     color-mix(in srgb, var(--color-brass) 55%, transparent) 0deg,
     color-mix(in srgb, var(--color-brass) 55%, transparent) 230deg,
     var(--color-brass-light) 280deg,
-    #ffe3ea 310deg,
-    #ffffff 325deg,
-    #ffe3ea 335deg,
+    var(--color-brass-light) 310deg,
+    var(--color-ivory) 325deg,
+    var(--color-brass-light) 335deg,
     color-mix(in srgb, var(--color-brass) 55%, transparent) 360deg
   );
   box-shadow: 0 22px 60px -24px color-mix(in srgb, var(--color-brass-light) 70%, transparent);
@@ -294,7 +294,7 @@
     transparent 0deg,
     transparent 250deg,
     color-mix(in srgb, var(--color-brass-light) 70%, transparent) 295deg,
-    #ffb3c6 325deg,
+    var(--color-brass-light) 325deg,
     color-mix(in srgb, var(--color-brass-light) 70%, transparent) 345deg,
     transparent 360deg
   );
