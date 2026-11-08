@@ -146,7 +146,7 @@ export function Introduction() {
                   index % 2 === 1 ? "pl-4 sm:pl-6 lg:pl-0" : "",
                 ].join(" ")}
               >
-                <span className="shrink-0 text-brass-light">
+                <span className="shrink-0 text-ivory">
                   <Icon size={36} />
                 </span>
                 <span className="min-w-0">
