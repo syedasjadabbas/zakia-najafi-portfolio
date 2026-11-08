@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
 /*
- * Identity: warm ivory paper, deep forest green, charcoal ink, and a muted
- * brass used sparingly for dates and small accents.
+ * Identity (client palette): cream paper #FFFAEB, chocolate brown #4E2C13,
+ * blush pink #FFD0DB and sage #BFD8B8. The token names predate the palette:
+ * "forest" is the brown, "sand" the pink, "forest-tint" the sage, and the
+ * "brass" accents are sage on cream and pink on brown.
  *
- * Contrast on ivory: ink 15.4:1, soft 8.7:1, forest 10.8:1, brass-dark 5.5:1 (4.8:1 on sand).
- * On forest: ivory 10.8:1, brass-light 6.6:1, ivory at 65% 5.6:1.
- * Mid brass (3.2:1) is only used for decorative arrows and rules.
+ * Contrast on ivory: ink 16.4:1, soft 8.7:1, forest 11.9:1, brass-dark 6.8:1 (5.2:1 on sand).
+ * On forest: ivory 11.9:1, brass-light 9:1.
+ * Mid brass (2.7:1) is only used for decorative arrows and rules.
  */
 @theme {
-  --color-ivory: #f8f4ec;
-  --color-sand: #efe6d4;
-  --color-sand-deep: #e3d6bd;
-  --color-ink: #1e1d1a;
-  --color-soft: #4a453d;
-  --color-line: #ddd3c0;
-  --color-forest: #1f3d2e;
-  --color-forest-deep: #162c21;
-  --color-forest-tint: #e3e9df;
-  --color-brass: #a8843f;
-  --color-brass-dark: #7a5f2a;
-  --color-brass-light: #d9bd85;
+  --color-ivory: #fffaeb;
+  --color-sand: #ffd0db;
+  --color-sand-deep: #f7b9c8;
+  --color-ink: #2a1709;
+  --color-soft: #5c4332;
+  --color-line: #ecdcc6;
+  --color-forest: #4e2c13;
+  --color-forest-deep: #3b200d;
+  --color-forest-tint: #bfd8b8;
+  --color-brass: #7fa274;
+  --color-brass-dark: #42603b;
+  --color-brass-light: #ffd0db;
   --color-alert: #8f2d1c;
 
   --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
@@ -272,9 +274,9 @@
     color-mix(in srgb, var(--color-brass) 55%, transparent) 0deg,
     color-mix(in srgb, var(--color-brass) 55%, transparent) 230deg,
     var(--color-brass-light) 280deg,
-    #ffe9a8 310deg,
+    #ffe3ea 310deg,
     #ffffff 325deg,
-    #ffe9a8 335deg,
+    #ffe3ea 335deg,
     color-mix(in srgb, var(--color-brass) 55%, transparent) 360deg
   );
   box-shadow: 0 22px 60px -24px color-mix(in srgb, var(--color-brass-light) 70%, transparent);
@@ -292,7 +294,7 @@
     transparent 0deg,
     transparent 250deg,
     color-mix(in srgb, var(--color-brass-light) 70%, transparent) 295deg,
-    #ffd77a 325deg,
+    #ffb3c6 325deg,
     color-mix(in srgb, var(--color-brass-light) 70%, transparent) 345deg,
     transparent 360deg
   );

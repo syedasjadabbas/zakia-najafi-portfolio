@@ -27,7 +27,7 @@ export default async function OpenGraphImage() {
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: "#f8f4ec", color: "#1e1d1a" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#fffaeb", color: "#2a1709" }}>
         <div
           style={{
             width: 640,
@@ -52,12 +52,12 @@ export default async function OpenGraphImage() {
             }}
           >
             <span>Zakia Batool</span>
-            <span style={{ fontStyle: "italic", color: "#1f3d2e" }}>Najafi</span>
+            <span style={{ fontStyle: "italic", color: "#4e2c13" }}>Najafi</span>
           </div>
           <div style={{ display: "flex", marginTop: 30, fontFamily: "Newsreader", fontSize: 32 }}>
             {site.qualification}
           </div>
-          <div style={{ display: "flex", marginTop: 14, fontFamily: "Plex", fontSize: 24, lineHeight: 1.45, color: "#4a453d" }}>
+          <div style={{ display: "flex", marginTop: 14, fontFamily: "Plex", fontSize: 24, lineHeight: 1.45, color: "#5c4332" }}>
             Islamic lectures and majalis, Hawzah courses and Tafseer classes
           </div>
         </div>

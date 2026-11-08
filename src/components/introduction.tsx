@@ -57,7 +57,7 @@ export function Introduction() {
   return (
     <section aria-labelledby="intro-title" className="relative overflow-hidden">
       {/* Phones and tablets: the arch scene above the text, with her centred in the arch. */}
-      <div className="relative h-[22rem] overflow-hidden bg-[#efe7d9] sm:h-[32rem] lg:hidden">
+      <div className="relative h-[22rem] overflow-hidden bg-sand sm:h-[32rem] lg:hidden">
         <HeroBackground className="object-[86%_100%] sm:object-[100%_100%]" />
         {/* left = where the arch centre lands for the image size at each breakpoint (22rem tall → 856px wide, arch at 624px) */}
         <Portrait className="left-[calc(0.86*(100%-856px)+624px)] h-[82%] sm:left-[calc(100%-338px)] sm:h-[90%]" />
