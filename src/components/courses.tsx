@@ -50,7 +50,7 @@ export function Courses() {
           <div>
             <p className="eyebrow">Courses</p>
             <h2 id="courses-title" className="mt-4 text-[2.375rem] leading-[1.08] tracking-[-0.015em] md:text-[3rem]">
-              Hawzah courses and Tafseer classes
+              Hawzah Courses and Tafseer Classes
             </h2>
           </div>
           <p className="mt-5 max-w-[34rem] text-soft">

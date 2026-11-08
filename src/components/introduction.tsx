@@ -7,8 +7,8 @@ import { BookOpenIcon, BookTextIcon, PeopleIcon, PlayIcon, QuranIcon } from "./i
 
 const teaching: { label: string; note: string; href: string; Icon: ComponentType<{ size?: number }> }[] = [
   { label: "Islamic lectures & majalis", note: "Live online and recorded", href: "#lectures", Icon: BookOpenIcon },
-  { label: "Hawzah courses", note: "Seminary studies", href: "#courses", Icon: BookTextIcon },
-  { label: "Tafseer classes", note: "Study of the Qur’an", href: "#courses", Icon: QuranIcon },
+  { label: "Hawzah Courses", note: "Seminary studies", href: "#courses", Icon: BookTextIcon },
+  { label: "Tafseer Classes", note: "Study of the Qur’an", href: "#courses", Icon: QuranIcon },
   { label: "Consultation", note: "How to request", href: "#contact", Icon: PeopleIcon },
 ];
 

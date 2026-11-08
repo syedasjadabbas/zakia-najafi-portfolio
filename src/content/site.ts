@@ -99,7 +99,7 @@ export const site = {
 
   courses: [
     {
-      title: "Hawzah courses",
+      title: "Hawzah Courses",
       description: null,
       schedule: null,
       format: null,
@@ -107,7 +107,7 @@ export const site = {
       registration: null,
     },
     {
-      title: "Tafseer classes",
+      title: "Tafseer Classes",
       description: null,
       schedule: null,
       format: null,
