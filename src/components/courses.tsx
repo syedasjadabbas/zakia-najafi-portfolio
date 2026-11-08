@@ -14,16 +14,16 @@ function details(course: Course) {
 
 export function Courses() {
   return (
-    <section id="courses" aria-labelledby="courses-title" className="relative overflow-hidden bg-sand pb-36 pt-36 sm:pb-40 sm:pt-40 lg:pb-44 lg:pt-44">
+    <section id="courses" aria-labelledby="courses-title" className="relative overflow-hidden bg-forest-tint pb-36 pt-36 sm:pb-40 sm:pt-40 lg:pb-44 lg:pt-44">
       {/*
         Background calligraphy, set in Amiri (not an image):
         Qur'an 20:114, and the hadith of the Prophet (s) recorded in al-Kafi and Sunan Ibn Majah.
       */}
-      {/* Scholar's bookshelf on the right (AI-generated, no people or text), fading into the sand. */}
+      {/* Scholar's bookshelf on the right (AI-generated, no people or text), fading into the sage. */}
       <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
         <Image src="/images/courses-bookshelf.webp" alt="" fill sizes="46vw" quality={90} className="object-cover object-[60%_50%]" />
-        <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-sand to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-sand to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-forest-tint to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-forest-tint to-transparent" />
       </div>
 
       <div aria-hidden className="pointer-events-none absolute inset-0 select-none font-arabic text-brass-dark">
