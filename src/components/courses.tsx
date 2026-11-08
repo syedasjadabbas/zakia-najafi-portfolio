@@ -80,7 +80,7 @@ export function Courses() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
                   <Icon size={40} className="shrink-0 text-brass-dark" />
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[1.75rem] leading-tight">{course.title}</h3>
+                    <h3 className="text-[1.75rem] font-bold leading-tight">{course.title}</h3>
                     {course.description ? <p className="mt-3 text-soft">{course.description}</p> : null}
                     {rows.length ? (
                       <dl className="mt-5 grid grid-cols-[7.5rem_1fr] gap-x-4 gap-y-2 text-[0.9375rem]">
